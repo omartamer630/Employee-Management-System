@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.employeemanagementsystem.controller.MainController"
+            prefHeight="700.0" prefWidth="1000.0">
+
+    <!-- Top: Title -->
+    <top>
+        <VBox style="-fx-background-color: #2c3e50; -fx-padding: 20;">
+            <Label text="Employee Management System" textFill="white" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
+        </VBox>
+    </top>
+
+    <!-- Center: Main Content -->
+    <center>
+        <SplitPane dividerPositions="0.4" prefHeight="160.0" prefWidth="200.0">
+
+            <!-- Left Side: Input Form -->
+            <VBox spacing="10" style="-fx-padding: 15;">
+                <Label text="Employee Information" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+
+                <GridPane hgap="10" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="100" prefWidth="120"/>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="150" prefWidth="200"/>
+                    </columnConstraints>
+
+                    <Label text="Employee ID:" GridPane.rowIndex="0"/>
+                    <TextField fx:id="txtEmployeeId" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                    <Label text="First Name:" GridPane.rowIndex="1"/>
+                    <TextField fx:id="txtFirstName" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                    <Label text="Last Name:" GridPane.rowIndex="2"/>
+                    <TextField fx:id="txtLastName" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                    <Label text="Email:" GridPane.rowIndex="3"/>
+                    <TextField fx:id="txtEmail" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                    <Label text="Phone:" GridPane.rowIndex="4"/>
+                    <TextField fx:id="txtPhone" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+                    <Label text="Hire Date:" GridPane.rowIndex="5"/>
+                    <DatePicker fx:id="dateHire" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+
+                    <Label text="Department:" GridPane.rowIndex="6"/>
+                    <TextField fx:id="txtDepartment" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+
+                    <Label text="Base Salary:" GridPane.rowIndex="7"/>
+                    <TextField fx:id="txtSalary" GridPane.columnIndex="1" GridPane.rowIndex="7"/>
+
+                    <Label text="Employee Type:" GridPane.rowIndex="8"/>
+                    <ComboBox fx:id="cmbEmployeeType" GridPane.columnIndex="1" GridPane.rowIndex="8"
+                              prefWidth="200"/>
+                </GridPane>
+
+                <!-- Action Buttons -->
+                <HBox spacing="10" style="-fx-padding: 10 0 0 0;">
+                    <Button fx:id="btnAddEmployee" text="Add (Factory)" onAction="#handleAddEmployee"
+                            style="-fx-background-color: #27ae60; -fx-text-fill: white;"/>
+                    <Button text="Add (Builder)" onAction="#handleAddEmployeeWithBuilder"
+                            style="-fx-background-color: #16a085; -fx-text-fill: white;"/>
+                </HBox>
+
+                <HBox spacing="10">
+                    <Button fx:id="btnUpdateEmployee" text="Update" onAction="#handleUpdateEmployee"
+                            style="-fx-background-color: #2980b9; -fx-text-fill: white;"/>
+                    <Button fx:id="btnDeleteEmployee" text="Delete" onAction="#handleDeleteEmployee"
+                            style="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>
+                    <Button fx:id="btnClearFields" text="Clear" onAction="#clearFields"
+                            style="-fx-background-color: #95a5a6; -fx-text-fill: white;"/>
+                </HBox>
+
+                <!-- Pattern Actions -->
+                <Separator/>
+                <Label text="Design Pattern Actions" style="-fx-font-size: 14; -fx-font-weight: bold;"/>
+
+                <HBox spacing="10">
+                    <Button fx:id="btnProcessPayroll" text="Process Payroll (Singleton)"
+                            onAction="#handleProcessPayroll"
+                            style="-fx-background-color: #8e44ad; -fx-text-fill: white;"/>
+                </HBox>
+
+                <HBox spacing="10">
+                    <Button fx:id="btnApplyBonus" text="Apply Bonus (Decorator)"
+                            onAction="#handleApplyBonus"
+                            style="-fx-background-color: #d35400; -fx-text-fill: white;"/>
+                </HBox>
+
+                <HBox spacing="10">
+                    <Button fx:id="btnCloneEmployee" text="Clone Employee (Prototype)"
+                            onAction="#handleCloneEmployee"
+                            style="-fx-background-color: #c0392b; -fx-text-fill: white;"/>
+                </HBox>
+
+                <HBox spacing="10">
+                    <Button text="Create Department (Factory)" onAction="#handleCreateDepartment"
+                            style="-fx-background-color: #2c3e50; -fx-text-fill: white;"/>
+                </HBox>
+
+                <Separator/>
+                <Label fx:id="lblStatus" text="Ready" style="-fx-text-fill: #27ae60; -fx-font-weight: bold;"/>
+            </VBox>
+
+            <!-- Right Side: Table and Reports -->
+            <VBox spacing="10" style="-fx-padding: 15;">
+                <!-- Search Box -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Search:"/>
+                    <TextField fx:id="txtSearch" promptText="Search by name or department..."
+                               prefWidth="250"/>
+                    <Button text="Search" onAction="#handleSearch"
+                            style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
+                </HBox>
+
+                <!-- Employee Table -->
+                <TableView fx:id="employeeTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
+                        <TableColumn fx:id="colFirstName" text="First Name" prefWidth="100"/>
+                        <TableColumn fx:id="colLastName" text="Last Name" prefWidth="100"/>
+                        <TableColumn fx:id="colEmail" text="Email" prefWidth="150"/>
+                        <TableColumn fx:id="colDepartment" text="Department" prefWidth="100"/>
+                        <TableColumn fx:id="colType" text="Type" prefWidth="100"/>
+                        <TableColumn fx:id="colSalary" text="Salary" prefWidth="80"/>
+                    </columns>
+                </TableView>
+
+                <!-- Payroll Report Area -->
+                <VBox spacing="5">
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Payroll Report:" style="-fx-font-weight: bold;"/>
+                        <Button text="Generate Report" onAction="#handleGeneratePayrollReport"
+                                style="-fx-background-color: #34495e; -fx-text-fill: white;"/>
+                    </HBox>
+                    <TextArea fx:id="txtPayrollReport" prefHeight="150" editable="false"
+                              promptText="Payroll report will appear here..."/>
+                </VBox>
+            </VBox>
+
+        </SplitPane>
+    </center>
+
+    <!-- Bottom: Footer -->
+    <bottom>
+        <HBox style="-fx-background-color: #ecf0f1; -fx-padding: 10;" alignment="CENTER">
+            <Label text="© 2024 Employee Management System - University Project"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>
