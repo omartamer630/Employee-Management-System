@@ -3,44 +3,46 @@ package com.employeemanagementsystem.patterns.singleton;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * SINGLETON PATTERN - Database Connection Manager
  * Ensures only one database connection instance exists throughout the application
- * This provides centralized database access and prevents multiple connections
  */
 public class DatabaseConnection {
-    // Single instance of the class
     private static DatabaseConnection instance;
     private Connection connection;
 
-    // Database credentials
-    private static final String URL =
-            "jdbc:mysql://localhost:3306/employee_management_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
+    private static final String DB_NAME = "employee_management_db";
+    private static final String URL_WITHOUT_DB = "jdbc:mysql://localhost:3306/?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
+    private static final String URL_WITH_DB = "jdbc:mysql://localhost:3306/" + DB_NAME + "?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
     private static final String USERNAME = "root";
-    private static final String PASSWORD = "khemu123456"; // Your Docker MySQL password
+    private static final String PASSWORD = "khemu123456";
 
-    /**
-     * Private constructor to prevent instantiation from outside
-     * This is key to Singleton pattern - no one can create new instances
-     */
     private DatabaseConnection() {
         try {
-            // Load MySQL JDBC driver
             Class.forName("com.mysql.cj.jdbc.Driver");
-            // Establish connection
-            this.connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+
+            // Step 1: Connect without database
+            connection = DriverManager.getConnection(URL_WITHOUT_DB, USERNAME, PASSWORD);
+
+            // Step 2: Create database if not exists
+            try (Statement stmt = connection.createStatement()) {
+                stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS " + DB_NAME);
+                System.out.println("Database checked/created successfully!");
+            }
+
+            // Step 3: Reconnect with the database
+            connection.close(); // close old connection
+            connection = DriverManager.getConnection(URL_WITH_DB, USERNAME, PASSWORD);
             System.out.println("Database connection established successfully!");
+
         } catch (ClassNotFoundException | SQLException e) {
             System.err.println("Database connection failed: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    /**
-     * Public method to get the single instance of DatabaseConnection
-     * Thread-safe using synchronized keyword
-     */
     public static synchronized DatabaseConnection getInstance() {
         if (instance == null) {
             instance = new DatabaseConnection();
@@ -48,16 +50,10 @@ public class DatabaseConnection {
         return instance;
     }
 
-    /**
-     * Get the actual database connection object
-     */
     public Connection getConnection() {
         return connection;
     }
 
-    /**
-     * Close the database connection
-     */
     public void closeConnection() {
         try {
             if (connection != null && !connection.isClosed()) {
