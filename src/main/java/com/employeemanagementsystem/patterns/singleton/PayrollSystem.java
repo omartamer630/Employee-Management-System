@@ -8,32 +8,26 @@ import java.util.Map;
 /**
  * SINGLETON PATTERN - Payroll System
  * Ensures centralized and consistent payroll processing
- * Only one payroll system should exist to maintain consistency
  */
 public class PayrollSystem {
-    // Single instance
+
     private static PayrollSystem instance;
 
-    // Store payroll records: Employee ID -> Total Paid
-    private Map<Integer, Double> payrollRecords;
+    // Employee ID -> Total Paid Amount
+    private final Map<Integer, Double> payrollRecords;
 
-    /**
-     * Private constructor to prevent external instantiation
-     */
     private PayrollSystem() {
         this.payrollRecords = new HashMap<>();
         System.out.println("Payroll System initialized.");
     }
 
     /**
-     * Get the single instance of PayrollSystem
-     * Thread-safe implementation
+     * Singleton access method
      */
     public static synchronized PayrollSystem getInstance() {
-        // TODO: Implement Singleton pattern
-        // Check if instance exists, create if not, return existing instance
-        // This ensures all payroll operations go through the same system
-
+        if (instance == null) {
+            instance = new PayrollSystem();
+        }
         return instance;
     }
 
@@ -41,38 +35,55 @@ public class PayrollSystem {
      * Process payroll for an employee
      */
     public void processPayroll(Employee employee) {
-        // TODO: Implement payroll processing logic
-        // 1. Calculate the employee's salary using calculateSalary() method
-        // 2. Update the payrollRecords map with employee ID and salary
-        // 3. Print a confirmation message
-        // 4. You might want to also save this to the database
+        double salary = employee.calculateSalary(); // your Employee model must have this
 
+        payrollRecords.put(
+                employee.getEmployeeId(),
+                payrollRecords.getOrDefault(employee.getEmployeeId(), 0.0) + salary
+        );
+
+        System.out.println(
+                "Payroll processed for " + employee.getFirstName() + " "
+                        + employee.getLastName() + " | Paid: $" + salary
+                        + " | Date: " + LocalDate.now()
+        );
     }
 
     /**
      * Get total amount paid to an employee
      */
     public double getTotalPaid(int employeeId) {
-        // TODO: Implement logic to retrieve total paid amount
-        // Return the amount from payrollRecords map
-        // If employee not found, return 0.0
-
-        return 0.0;
+        return payrollRecords.getOrDefault(employeeId, 0.0);
     }
 
     /**
-     * Generate payroll report for all employees
+     * Generate payroll report
      */
     public String generatePayrollReport() {
-        // TODO: Implement payroll report generation
-        // Create a formatted string showing all employees and their payments
-        // Include total payroll amount
+        if (payrollRecords.isEmpty()) {
+            return "No payroll has been processed yet.";
+        }
 
-        return "";
+        StringBuilder report = new StringBuilder();
+        report.append("===== Payroll Report =====\n");
+
+        double totalAll = 0.0;
+
+        for (Map.Entry<Integer, Double> entry : payrollRecords.entrySet()) {
+            report.append("Employee ID: ").append(entry.getKey())
+                    .append(" | Total Paid: $").append(entry.getValue()).append("\n");
+
+            totalAll += entry.getValue();
+        }
+
+        report.append("--------------------------\n");
+        report.append("Total Payroll Paid: $").append(totalAll).append("\n");
+
+        return report.toString();
     }
 
     /**
-     * Clear all payroll records (for testing or reset)
+     * Clear all payroll data
      */
     public void clearRecords() {
         payrollRecords.clear();
@@ -80,7 +91,7 @@ public class PayrollSystem {
     }
 
     /**
-     * Get all payroll records
+     * Retrieve all payroll records
      */
     public Map<Integer, Double> getAllRecords() {
         return new HashMap<>(payrollRecords);

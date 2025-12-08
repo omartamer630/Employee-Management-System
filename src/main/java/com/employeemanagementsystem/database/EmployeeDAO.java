@@ -49,10 +49,12 @@ public class EmployeeDAO {
     public List<Employee> getAllEmployees() {
         List<Employee> employees = new ArrayList<>();
         String sql = "SELECT * FROM employees";
+        System.out.println("Executing query: " + sql); // Debug
 
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
+            System.out.println("ResultSet obtained: " + (rs != null)); // Debug
 
             while (rs.next()) {
                 int id = rs.getInt("employee_id");
@@ -93,12 +95,14 @@ public class EmployeeDAO {
      */
     public Employee getEmployeeById(int employeeId) {
         String sql = "SELECT * FROM employees WHERE employee_id = ?";
+        System.out.println("Executing query: " + sql); // Debug
 
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, employeeId);
             ResultSet rs = pstmt.executeQuery();
+            System.out.println("ResultSet obtained: " + (rs != null)); // Debug
 
             if (rs.next()) {
                 String firstName = rs.getString("first_name");

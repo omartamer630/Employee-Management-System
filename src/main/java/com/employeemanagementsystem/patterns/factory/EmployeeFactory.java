@@ -50,7 +50,7 @@ public class EmployeeFactory {
         //    - additionalParam2 should be cast to String (project name)
         //    - Create and return a new Contractor object
         //
-        // If type doesn't match any of the above, throw an IllegalArgumentException
+//         If type doesn't match any of the above, throw an IllegalArgumentException
 
         return null;
     }

@@ -265,13 +265,12 @@ public class MainController {
             return;
         }
 
-        // TODO: ABDELRAHMAN MOHAMED - Use PayrollSystem Singleton
-        // PayrollSystem payroll = PayrollSystem.getInstance();
-        // payroll.processPayroll(selected);
-        // double total = payroll.getTotalPaid(selected.getEmployeeId());
-        // lblStatus.setText("✓ Payroll processed! Total: $" + total);
+        PayrollSystem payroll = PayrollSystem.getInstance();
+        payroll.processPayroll(selected);
 
-        lblStatus.setText("✓ Payroll processed using Singleton Pattern!");
+        double total = payroll.getTotalPaid(selected.getEmployeeId());
+
+        lblStatus.setText("✓ Payroll processed! Total Paid: $" + total);
         lblStatus.setStyle("-fx-text-fill: green;");
     }
 
@@ -280,13 +279,11 @@ public class MainController {
      */
     @FXML
     private void handleGeneratePayrollReport() {
-        // TODO: ABDELRAHMAN MOHAMED - Generate payroll report
-        // PayrollSystem payroll = PayrollSystem.getInstance();
-        // String report = payroll.generatePayrollReport();
-        // txtPayrollReport.setText(report);
+        PayrollSystem payroll = PayrollSystem.getInstance();
+        String report = payroll.generatePayrollReport();
 
-        txtPayrollReport.setText("Payroll Report Generated!");
-        lblStatus.setText("✓ Report generated!");
+        txtPayrollReport.setText(report);
+        lblStatus.setText("✓ Payroll Report Generated!");
         lblStatus.setStyle("-fx-text-fill: green;");
     }
 
