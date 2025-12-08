@@ -37,7 +37,6 @@ public class MainController {
     @FXML private TableColumn<Employee, String> colType;
     @FXML private TableColumn<Employee, Double> colSalary;
 
-    @FXML private TextField txtEmployeeId;
     @FXML private TextField txtFirstName;
     @FXML private TextField txtLastName;
     @FXML private TextField txtEmail;
@@ -144,7 +143,6 @@ public class MainController {
      * Display selected employee details (Ali Hassan Ali)
      */
     private void displayEmployeeDetails(Employee employee) {
-        txtEmployeeId.setText(String.valueOf(employee.getEmployeeId()));
         txtFirstName.setText(employee.getFirstName());
         txtLastName.setText(employee.getLastName());
         txtEmail.setText(employee.getEmail());
@@ -328,7 +326,7 @@ public class MainController {
     @FXML
     private void handleAddEmployeeWithBuilder() {
         try {
-            int id = Integer.parseInt(txtEmployeeId.getText());
+            int id = (int)(Math.random() * 10000) + 1;
             String firstName = txtFirstName.getText();
             String lastName = txtLastName.getText();
 
@@ -619,7 +617,6 @@ public class MainController {
      */
     @FXML
     private void clearFields() {
-        txtEmployeeId.clear();
         txtFirstName.clear();
         txtLastName.clear();
         txtEmail.clear();
