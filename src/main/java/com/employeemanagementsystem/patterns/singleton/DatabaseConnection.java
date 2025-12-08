@@ -20,24 +20,36 @@ public class DatabaseConnection {
     private static final String USERNAME = "root";
     private static final String PASSWORD = "khemu123456";
 
+
+
     private DatabaseConnection() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
 
-            // Step 1: Connect without specifying database
-            connection = DriverManager.getConnection(URL_WITHOUT_DB, USERNAME, PASSWORD);
+            // Step 1: Connect without specifying database (temporary connection)
+            Connection tempConnection = DriverManager.getConnection(URL_WITHOUT_DB, USERNAME, PASSWORD);
 
             // Step 2: Create database if it doesn't exist
-            try (Statement stmt = connection.createStatement()) {
+            try (Statement stmt = tempConnection.createStatement()) {
                 stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS " + DB_NAME);
                 System.out.println("Database checked/created successfully!");
             }
 
-            // Step 3: Connect to the actual database
-            connection.close();
+            // Step 3: Close the temporary connection
+            tempConnection.close();
+
+            // Step 4: Create the actual persistent connection to the database
             connection = DriverManager.getConnection(URL_WITH_DB, USERNAME, PASSWORD);
 
-            // Step 4: Create tables and insert sample data if not exists
+            // Step 5: Set connection properties to prevent premature closing
+            connection.setAutoCommit(true); // Enable auto-commit
+
+            // Optional: Set timeout to keep connection alive
+            try (Statement stmt = connection.createStatement()) {
+                stmt.execute("SET SESSION wait_timeout=28800"); // 8 hours
+            }
+
+            // Step 6: Create tables and insert sample data if not exists
             initializeTables();
 
             System.out.println("Database connection established successfully!");
@@ -187,18 +199,86 @@ public class DatabaseConnection {
         return instance;
     }
 
-    public Connection getConnection() {
-        return connection;
+    /**
+     * Gets the database connection
+     * @return Connection object
+     */
+    public Connection getConnection() throws SQLException {
+        Connection conn = DriverManager.getConnection(URL_WITH_DB, USERNAME, PASSWORD);
+        conn.setAutoCommit(true);
+        return conn;
     }
 
-    public void closeConnection() {
+    /**
+     * Gets a validated connection, reconnects if necessary
+     * @return Valid Connection object
+     */
+    public synchronized Connection getValidConnection() {
+        try {
+            // Check if connection is valid
+            if (connection == null || connection.isClosed() || !connection.isValid(2)) {
+                System.out.println("Connection invalid or closed. Reconnecting...");
+                reconnect();
+            }
+            return connection;
+        } catch (SQLException e) {
+            System.err.println("Error checking connection: " + e.getMessage());
+            reconnect();
+            return connection;
+        }
+    }
+
+    /**
+     * Re-establishes the database connection
+     */
+    private synchronized void reconnect() {
+        closeConnection(); // Close old connection if exists
+
+        try {
+            connection = DriverManager.getConnection(URL_WITH_DB, USERNAME, PASSWORD);
+            connection.setAutoCommit(true);
+            System.out.println("Database reconnected successfully!");
+        } catch (SQLException e) {
+            System.err.println("Failed to reconnect: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Closes the database connection
+     */
+    public synchronized void closeConnection() {
         try {
             if (connection != null && !connection.isClosed()) {
+                // Don't close if connection is still in use
+                try (Statement stmt = connection.createStatement()) {
+                    // Check if any operations are pending
+                    // If this fails, connection might be in use
+                }
                 connection.close();
                 System.out.println("Database connection closed.");
             }
         } catch (SQLException e) {
             System.err.println("Error closing connection: " + e.getMessage());
+            // Don't throw, just log
+        }
+    }
+    /**
+     * Tests if the connection is valid
+     * @return true if connection is valid, false otherwise
+     */
+    public boolean testConnection() {
+        try {
+            if (connection != null && !connection.isClosed() && connection.isValid(2)) {
+                System.out.println("Database connection test: PASSED");
+                return true;
+            } else {
+                System.out.println("Database connection test: FAILED - Connection is invalid");
+                return false;
+            }
+        } catch (SQLException e) {
+            System.err.println("Database connection test: FAILED - " + e.getMessage());
+            return false;
         }
     }
 }

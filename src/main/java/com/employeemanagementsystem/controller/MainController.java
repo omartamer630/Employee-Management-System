@@ -353,6 +353,7 @@ public class MainController {
         Employee selected = employeeTable.getSelectionModel().getSelectedItem();
 
         if (selected == null) {
+            System.out.println("selected is null");
             lblStatus.setText("✗ Please select an employee.");
             lblStatus.setStyle("-fx-text-fill: red;");
             return;
@@ -372,6 +373,7 @@ public class MainController {
      */
     @FXML
     private void handleGeneratePayrollReport() {
+        System.out.println("generating report");
         PayrollSystem payroll = PayrollSystem.getInstance();
         String report = payroll.generatePayrollReport();
 

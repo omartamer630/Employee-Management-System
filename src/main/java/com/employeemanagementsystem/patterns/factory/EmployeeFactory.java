@@ -32,27 +32,31 @@ public class EmployeeFactory {
                                           String lastName, String email, String phoneNumber,
                                           LocalDate hireDate, String department, double baseSalary,
                                           Object additionalParam1, Object additionalParam2) {
+        String normalizedType = type.toLowerCase().trim();
 
-        // TODO: Implement Factory Pattern logic
-        // Based on the 'type' parameter, create and return the appropriate employee object
-        //
-        // If type is "fulltime" or "full-time":
-        //    - additionalParam1 should be cast to Integer (annual leave days)
-        //    - Create and return a new FullTimeEmployee object
-        //
-        // If type is "parttime" or "part-time":
-        //    - additionalParam1 should be cast to Integer (hours per week)
-        //    - additionalParam2 should be cast to Double (hourly rate)
-        //    - Create and return a new PartTimeEmployee object
-        //
-        // If type is "contractor":
-        //    - additionalParam1 should be cast to LocalDate (contract end date)
-        //    - additionalParam2 should be cast to String (project name)
-        //    - Create and return a new Contractor object
-        //
-//         If type doesn't match any of the above, throw an IllegalArgumentException
+        if (normalizedType.contains("full")) {
+            int annualLeaveDays = (additionalParam1 != null) ? (Integer) additionalParam1 : 20;
+            return new FullTimeEmployee(employeeId, firstName, lastName, email, phoneNumber,
+                    hireDate, department, baseSalary, annualLeaveDays);
+        }
+        // aasda
+        if (normalizedType.contains("part")) {
+            int hoursPerWeek = (additionalParam1 != null) ? (Integer) additionalParam1 : 20;
+            double hourlyRate = (additionalParam2 != null) ? (Double) additionalParam2 : 15.0;
+            return new PartTimeEmployee(employeeId, firstName, lastName, email, phoneNumber,
+                    hireDate, department, baseSalary, hoursPerWeek, hourlyRate);
+        }
 
-        return null;
+        if (normalizedType.contains("contract")) {
+            LocalDate contractEndDate = (additionalParam1 != null) ?
+                    (LocalDate) additionalParam1 : LocalDate.now().plusYears(1);
+            String projectName = (additionalParam2 != null) ?
+                    (String) additionalParam2 : "General Project";
+            return new Contractor(employeeId, firstName, lastName, email, phoneNumber,
+                    hireDate, department, baseSalary, contractEndDate, projectName);
+        }
+
+        throw new IllegalArgumentException("Invalid employee type: " + type);
     }
 
     /**
@@ -60,13 +64,13 @@ public class EmployeeFactory {
      * Useful for testing or default employee creation
      */
     public static Employee createDefaultEmployee(String type, String firstName, String lastName) {
-        // TODO: Implement a simplified employee creation method
-        // Generate a random employee ID
-        // Set default values for email, phone, hire date (today), department ("General")
-        // Set default base salary (5000 for example)
-        // Set default additional parameters based on type
-        // Call the main createEmployee method with these defaults
+        int randomId = (int)(Math.random() * 9000) + 1000;
+        String email = firstName.toLowerCase() + "." + lastName.toLowerCase() + "@company.com";
 
-        return null;
+        return createEmployee(type, randomId, firstName, lastName, email, "555-0100",
+                LocalDate.now(), "General", 5000.0,
+                type.toLowerCase().contains("full") ? 20 :
+                        type.toLowerCase().contains("part") ? 20 : LocalDate.now().plusYears(1),
+                type.toLowerCase().contains("part") ? 15.0 : "Default Project");
     }
 }
