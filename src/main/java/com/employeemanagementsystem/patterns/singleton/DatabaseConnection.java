@@ -20,8 +20,6 @@ public class DatabaseConnection {
     private static final String USERNAME = "root";
     private static final String PASSWORD = "khemu123456";
 
-
-
     private DatabaseConnection() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -76,7 +74,7 @@ public class DatabaseConnection {
                 )
             """);
 
-            // Employees table
+            // Employees table - UPDATED with department_id as foreign key
             stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS employees (
                     employee_id INT PRIMARY KEY,
@@ -85,9 +83,10 @@ public class DatabaseConnection {
                     email VARCHAR(100),
                     phone_number VARCHAR(20),
                     hire_date DATE NOT NULL,
-                    department VARCHAR(100),
+                    department_id INT,
                     base_salary DECIMAL(10,2) NOT NULL,
-                    employee_type VARCHAR(20) NOT NULL
+                    employee_type VARCHAR(20) NOT NULL,
+                    FOREIGN KEY (department_id) REFERENCES departments(department_id) ON DELETE SET NULL
                 )
             """);
 
@@ -114,46 +113,31 @@ public class DatabaseConnection {
                 SELECT 2, 'Finance', 'Finance Manager', 'Building A, Floor 2' FROM DUAL
                 WHERE NOT EXISTS (SELECT * FROM departments WHERE department_id = 2);
             """);
-            stmt.executeUpdate("""
-                INSERT INTO departments (department_id, department_name, manager_name, location)
-                SELECT 3, 'Information Technology', 'IT Manager', 'Building B, Floor 3' FROM DUAL
-                WHERE NOT EXISTS (SELECT * FROM departments WHERE department_id = 3);
-            """);
-            stmt.executeUpdate("""
-                INSERT INTO departments (department_id, department_name, manager_name, location)
-                SELECT 4, 'Sales', 'Sales Manager', 'Building A, Floor 3' FROM DUAL
-                WHERE NOT EXISTS (SELECT * FROM departments WHERE department_id = 4);
-            """);
-            stmt.executeUpdate("""
-                INSERT INTO departments (department_id, department_name, manager_name, location)
-                SELECT 5, 'Operations', 'Operations Manager', 'Building C, Floor 1' FROM DUAL
-                WHERE NOT EXISTS (SELECT * FROM departments WHERE department_id = 5);
-            """);
 
-            // Insert sample employees if table is empty
+            // Insert sample employees if table is empty - UPDATED with department_id
             stmt.executeUpdate("""
-                INSERT INTO employees (employee_id, first_name, last_name, email, phone_number, hire_date, department, base_salary, employee_type)
-                SELECT 1, 'John', 'Doe', 'john.doe@company.com', '123-456-7890', '2023-01-15', 'IT', 6000.00, 'Full-time'
+                INSERT INTO employees (employee_id, first_name, last_name, email, phone_number, hire_date, department_id, base_salary, employee_type)
+                SELECT 1, 'John', 'Doe', 'john.doe@company.com', '123-456-7890', '2023-01-15', 1, 6000.00, 'Full-time'
                 FROM DUAL WHERE NOT EXISTS (SELECT * FROM employees WHERE employee_id = 1);
             """);
             stmt.executeUpdate("""
-                INSERT INTO employees (employee_id, first_name, last_name, email, phone_number, hire_date, department, base_salary, employee_type)
-                SELECT 2, 'Jane', 'Smith', 'jane.smith@company.com', '123-456-7891', '2023-02-20', 'HR', 5500.00, 'Full-time'
+                INSERT INTO employees (employee_id, first_name, last_name, email, phone_number, hire_date, department_id, base_salary, employee_type)
+                SELECT 2, 'Jane', 'Smith', 'jane.smith@company.com', '123-456-7891', '2023-02-20', 1, 5500.00, 'Full-time'
                 FROM DUAL WHERE NOT EXISTS (SELECT * FROM employees WHERE employee_id = 2);
             """);
             stmt.executeUpdate("""
-                INSERT INTO employees (employee_id, first_name, last_name, email, phone_number, hire_date, department, base_salary, employee_type)
-                SELECT 3, 'Bob', 'Johnson', 'bob.j@company.com', '123-456-7892', '2023-03-10', 'Finance', 5800.00, 'Full-time'
+                INSERT INTO employees (employee_id, first_name, last_name, email, phone_number, hire_date, department_id, base_salary, employee_type)
+                SELECT 3, 'Bob', 'Johnson', 'bob.j@company.com', '123-456-7892', '2023-03-10', 1, 5800.00, 'Full-time'
                 FROM DUAL WHERE NOT EXISTS (SELECT * FROM employees WHERE employee_id = 3);
             """);
             stmt.executeUpdate("""
-                INSERT INTO employees (employee_id, first_name, last_name, email, phone_number, hire_date, department, base_salary, employee_type)
-                SELECT 4, 'Alice', 'Williams', 'alice.w@company.com', '123-456-7893', '2023-04-05', 'IT', 3200.00, 'Part-time'
+                INSERT INTO employees (employee_id, first_name, last_name, email, phone_number, hire_date, department_id, base_salary, employee_type)
+                SELECT 4, 'Alice', 'Williams', 'alice.w@company.com', '123-456-7893', '2023-04-05', 2, 3200.00, 'Part-time'
                 FROM DUAL WHERE NOT EXISTS (SELECT * FROM employees WHERE employee_id = 4);
             """);
             stmt.executeUpdate("""
-                INSERT INTO employees (employee_id, first_name, last_name, email, phone_number, hire_date, department, base_salary, employee_type)
-                SELECT 5, 'Charlie', 'Brown', 'charlie.b@company.com', '123-456-7894', '2023-05-12', 'Sales', 7000.00, 'Contractor'
+                INSERT INTO employees (employee_id, first_name, last_name, email, phone_number, hire_date, department_id, base_salary, employee_type)
+                SELECT 5, 'Charlie', 'Brown', 'charlie.b@company.com', '123-456-7894', '2023-05-12', 2, 7000.00, 'Contractor'
                 FROM DUAL WHERE NOT EXISTS (SELECT * FROM employees WHERE employee_id = 5);
             """);
 
@@ -263,6 +247,7 @@ public class DatabaseConnection {
             // Don't throw, just log
         }
     }
+
     /**
      * Tests if the connection is valid
      * @return true if connection is valid, false otherwise

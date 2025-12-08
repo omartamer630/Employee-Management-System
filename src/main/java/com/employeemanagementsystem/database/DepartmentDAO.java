@@ -5,6 +5,7 @@ import com.employeemanagementsystem.patterns.singleton.DatabaseConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Data Access Object for Department operations
@@ -63,6 +64,29 @@ public class DepartmentDAO {
 
         return departments;
     }
+
+    public Optional<Department> getDepartmentByNameIgnoreCase(String name) {
+        try (Connection conn = DatabaseConnection.getInstance().getValidConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "SELECT * FROM departments WHERE LOWER(department_name) = LOWER(?)")) {
+
+            ps.setString(1, name);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return Optional.of(new Department(
+                        rs.getInt("department_id"),
+                        rs.getString("department_name"),
+                        rs.getString("manager_name"),
+                        rs.getString("location")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
 
     /**
      * Get department by ID

@@ -13,7 +13,7 @@ public abstract class Employee implements Cloneable {
     private String email;
     private String phoneNumber;
     private LocalDate hireDate;
-    private String department;
+    private Department department; // Changed from String to Department
     private double baseSalary;
     private String employeeType; // "Full-time", "Part-time", "Contractor"
 
@@ -21,7 +21,7 @@ public abstract class Employee implements Cloneable {
      * Constructor for Employee
      */
     public Employee(int employeeId, String firstName, String lastName, String email,
-                    String phoneNumber, LocalDate hireDate, String department,
+                    String phoneNumber, LocalDate hireDate, Department department,
                     double baseSalary, String employeeType) {
         this.employeeId = employeeId;
         this.firstName = firstName;
@@ -93,12 +93,17 @@ public abstract class Employee implements Cloneable {
         this.hireDate = hireDate;
     }
 
-    public String getDepartment() {
+    public Department getDepartment() {
         return department;
     }
 
-    public void setDepartment(String department) {
+    public void setDepartment(Department department) {
         this.department = department;
+    }
+
+    // Helper method to get department name
+    public String getDepartmentName() {
+        return department != null ? department.getDepartmentName() : "No Department";
     }
 
     public double getBaseSalary() {
@@ -138,7 +143,7 @@ public abstract class Employee implements Cloneable {
                 ", email='" + email + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", hireDate=" + hireDate +
-                ", department='" + department + '\'' +
+                ", department=" + (department != null ? department.getDepartmentName() : "None") +
                 ", baseSalary=" + baseSalary +
                 ", employeeType='" + employeeType + '\'' +
                 '}';

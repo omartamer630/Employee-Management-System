@@ -11,7 +11,7 @@ public class PartTimeEmployee extends Employee {
     private double hourlyRate;
 
     public PartTimeEmployee(int employeeId, String firstName, String lastName, String email,
-                            String phoneNumber, LocalDate hireDate, String department,
+                            String phoneNumber, LocalDate hireDate, Department department,
                             double baseSalary, int hoursPerWeek, double hourlyRate) {
         super(employeeId, firstName, lastName, email, phoneNumber, hireDate,
                 department, baseSalary, "Part-time");

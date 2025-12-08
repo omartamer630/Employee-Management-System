@@ -30,9 +30,6 @@
                         <ColumnConstraints hgrow="SOMETIMES" minWidth="150" prefWidth="200"/>
                     </columnConstraints>
 
-                    <Label text="Employee ID:" GridPane.rowIndex="0"/>
-                    <TextField fx:id="txtEmployeeId" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-
                     <Label text="First Name:" GridPane.rowIndex="1"/>
                     <TextField fx:id="txtFirstName" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
@@ -49,7 +46,7 @@
                     <DatePicker fx:id="dateHire" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
 
                     <Label text="Department:" GridPane.rowIndex="6"/>
-                    <TextField fx:id="txtDepartment" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+                    <ComboBox fx:id="cmbDepartment" GridPane.columnIndex="1" GridPane.rowIndex="6" prefWidth="200"/>
 
                     <Label text="Base Salary:" GridPane.rowIndex="7"/>
                     <TextField fx:id="txtSalary" GridPane.columnIndex="1" GridPane.rowIndex="7"/>

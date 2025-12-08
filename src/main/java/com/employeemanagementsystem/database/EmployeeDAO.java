@@ -18,7 +18,7 @@ public class EmployeeDAO {
      */
     public boolean insertEmployee(Employee employee) {
         String sql = "INSERT INTO employees (employee_id, first_name, last_name, email, " +
-                "phone_number, hire_date, department, base_salary, employee_type) " +
+                "phone_number, hire_date, department_id, base_salary, employee_type) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
@@ -30,7 +30,14 @@ public class EmployeeDAO {
             pstmt.setString(4, employee.getEmail());
             pstmt.setString(5, employee.getPhoneNumber());
             pstmt.setDate(6, Date.valueOf(employee.getHireDate()));
-            pstmt.setString(7, employee.getDepartment());
+
+            // Handle department_id
+            if (employee.getDepartment() != null) {
+                pstmt.setInt(7, employee.getDepartment().getDepartmentId());
+            } else {
+                pstmt.setNull(7, Types.INTEGER);
+            }
+
             pstmt.setDouble(8, employee.getBaseSalary());
             pstmt.setString(9, employee.getEmployeeType());
 
@@ -44,17 +51,22 @@ public class EmployeeDAO {
     }
 
     /**
-     * Get all employees from the database
+     * Get all employees from the database with department information
      */
     public List<Employee> getAllEmployees() {
         List<Employee> employees = new ArrayList<>();
-        String sql = "SELECT * FROM employees";
-        System.out.println("Executing query: " + sql); // Debug
+        String sql = """
+            SELECT e.*, d.department_id as dept_id, d.department_name, 
+                   d.manager_name, d.location
+            FROM employees e
+            LEFT JOIN departments d ON e.department_id = d.department_id
+            """;
+        System.out.println("Executing query: " + sql);
 
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-            System.out.println("ResultSet obtained: " + (rs != null)); // Debug
+            System.out.println("ResultSet obtained: " + (rs != null));
 
             while (rs.next()) {
                 int id = rs.getInt("employee_id");
@@ -63,21 +75,30 @@ public class EmployeeDAO {
                 String email = rs.getString("email");
                 String phone = rs.getString("phone_number");
                 LocalDate hireDate = rs.getDate("hire_date").toLocalDate();
-                String dept = rs.getString("department");
                 double salary = rs.getDouble("base_salary");
                 String type = rs.getString("employee_type");
+
+                // Create Department object
+                Department department = null;
+                int deptId = rs.getInt("dept_id");
+                if (!rs.wasNull()) {
+                    String deptName = rs.getString("department_name");
+                    String manager = rs.getString("manager_name");
+                    String location = rs.getString("location");
+                    department = new Department(deptId, deptName, manager, location);
+                }
 
                 // Create appropriate employee type
                 Employee emp;
                 if (type.equalsIgnoreCase("Full-time")) {
                     emp = new FullTimeEmployee(id, firstName, lastName, email, phone,
-                            hireDate, dept, salary, 20);
+                            hireDate, department, salary, 20);
                 } else if (type.equalsIgnoreCase("Part-time")) {
                     emp = new PartTimeEmployee(id, firstName, lastName, email, phone,
-                            hireDate, dept, salary, 20, 15.0);
+                            hireDate, department, salary, 20, 15.0);
                 } else {
                     emp = new Contractor(id, firstName, lastName, email, phone,
-                            hireDate, dept, salary,
+                            hireDate, department, salary,
                             LocalDate.now().plusYears(1), "Project");
                 }
                 employees.add(emp);
@@ -94,15 +115,21 @@ public class EmployeeDAO {
      * Get employee by ID
      */
     public Employee getEmployeeById(int employeeId) {
-        String sql = "SELECT * FROM employees WHERE employee_id = ?";
-        System.out.println("Executing query: " + sql); // Debug
+        String sql = """
+            SELECT e.*, d.department_id as dept_id, d.department_name, 
+                   d.manager_name, d.location
+            FROM employees e
+            LEFT JOIN departments d ON e.department_id = d.department_id
+            WHERE e.employee_id = ?
+            """;
+        System.out.println("Executing query: " + sql);
 
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, employeeId);
             ResultSet rs = pstmt.executeQuery();
-            System.out.println("ResultSet obtained: " + (rs != null)); // Debug
+            System.out.println("ResultSet obtained: " + (rs != null));
 
             if (rs.next()) {
                 String firstName = rs.getString("first_name");
@@ -110,19 +137,28 @@ public class EmployeeDAO {
                 String email = rs.getString("email");
                 String phone = rs.getString("phone_number");
                 LocalDate hireDate = rs.getDate("hire_date").toLocalDate();
-                String dept = rs.getString("department");
                 double salary = rs.getDouble("base_salary");
                 String type = rs.getString("employee_type");
 
+                // Create Department object
+                Department department = null;
+                int deptId = rs.getInt("dept_id");
+                if (!rs.wasNull()) {
+                    String deptName = rs.getString("department_name");
+                    String manager = rs.getString("manager_name");
+                    String location = rs.getString("location");
+                    department = new Department(deptId, deptName, manager, location);
+                }
+
                 if (type.equalsIgnoreCase("Full-time")) {
                     return new FullTimeEmployee(employeeId, firstName, lastName, email,
-                            phone, hireDate, dept, salary, 20);
+                            phone, hireDate, department, salary, 20);
                 } else if (type.equalsIgnoreCase("Part-time")) {
                     return new PartTimeEmployee(employeeId, firstName, lastName, email,
-                            phone, hireDate, dept, salary, 20, 15.0);
+                            phone, hireDate, department, salary, 20, 15.0);
                 } else {
                     return new Contractor(employeeId, firstName, lastName, email, phone,
-                            hireDate, dept, salary,
+                            hireDate, department, salary,
                             LocalDate.now().plusYears(1), "Project");
                 }
             }
@@ -139,7 +175,7 @@ public class EmployeeDAO {
      */
     public boolean updateEmployee(Employee employee) {
         String sql = "UPDATE employees SET first_name = ?, last_name = ?, email = ?, " +
-                "phone_number = ?, department = ?, base_salary = ? WHERE employee_id = ?";
+                "phone_number = ?, department_id = ?, base_salary = ? WHERE employee_id = ?";
 
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -148,7 +184,14 @@ public class EmployeeDAO {
             pstmt.setString(2, employee.getLastName());
             pstmt.setString(3, employee.getEmail());
             pstmt.setString(4, employee.getPhoneNumber());
-            pstmt.setString(5, employee.getDepartment());
+
+            // Handle department_id
+            if (employee.getDepartment() != null) {
+                pstmt.setInt(5, employee.getDepartment().getDepartmentId());
+            } else {
+                pstmt.setNull(5, Types.INTEGER);
+            }
+
             pstmt.setDouble(6, employee.getBaseSalary());
             pstmt.setInt(7, employee.getEmployeeId());
 
@@ -181,12 +224,18 @@ public class EmployeeDAO {
     }
 
     /**
-     * Search employees by name or department
+     * Search employees by name or department name
      */
     public List<Employee> searchEmployees(String keyword) {
         List<Employee> employees = new ArrayList<>();
-        String sql = "SELECT * FROM employees WHERE first_name LIKE ? OR last_name LIKE ? " +
-                "OR department LIKE ?";
+        String sql = """
+            SELECT e.*, d.department_id as dept_id, d.department_name, 
+                   d.manager_name, d.location
+            FROM employees e
+            LEFT JOIN departments d ON e.department_id = d.department_id
+            WHERE e.first_name LIKE ? OR e.last_name LIKE ? 
+               OR d.department_name LIKE ?
+            """;
 
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -205,20 +254,29 @@ public class EmployeeDAO {
                 String email = rs.getString("email");
                 String phone = rs.getString("phone_number");
                 LocalDate hireDate = rs.getDate("hire_date").toLocalDate();
-                String dept = rs.getString("department");
                 double salary = rs.getDouble("base_salary");
                 String type = rs.getString("employee_type");
+
+                // Create Department object
+                Department department = null;
+                int deptId = rs.getInt("dept_id");
+                if (!rs.wasNull()) {
+                    String deptName = rs.getString("department_name");
+                    String manager = rs.getString("manager_name");
+                    String location = rs.getString("location");
+                    department = new Department(deptId, deptName, manager, location);
+                }
 
                 Employee emp;
                 if (type.equalsIgnoreCase("Full-time")) {
                     emp = new FullTimeEmployee(id, firstName, lastName, email, phone,
-                            hireDate, dept, salary, 20);
+                            hireDate, department, salary, 20);
                 } else if (type.equalsIgnoreCase("Part-time")) {
                     emp = new PartTimeEmployee(id, firstName, lastName, email, phone,
-                            hireDate, dept, salary, 20, 15.0);
+                            hireDate, department, salary, 20, 15.0);
                 } else {
                     emp = new Contractor(id, firstName, lastName, email, phone,
-                            hireDate, dept, salary,
+                            hireDate, department, salary,
                             LocalDate.now().plusYears(1), "Project");
                 }
                 employees.add(emp);

@@ -7,12 +7,17 @@ import com.employeemanagementsystem.patterns.decorator.*;
 import com.employeemanagementsystem.patterns.factory.*;
 import com.employeemanagementsystem.patterns.prototype.EmployeePrototypeRegistry;
 import com.employeemanagementsystem.patterns.singleton.*;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.StringConverter;
+
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Main Controller for the Employee Management System (Ali Hassan Ali)
@@ -38,7 +43,7 @@ public class MainController {
     @FXML private TextField txtEmail;
     @FXML private TextField txtPhone;
     @FXML private DatePicker dateHire;
-    @FXML private TextField txtDepartment;
+    @FXML private ComboBox<Department> cmbDepartment; // Changed from TextField to ComboBox
     @FXML private TextField txtSalary;
     @FXML private ComboBox<String> cmbEmployeeType;
     @FXML private TextField txtSearch;
@@ -56,7 +61,6 @@ public class MainController {
     @FXML
     public void initialize() {
         // TODO: ALI HASSAN ALI - Initialize Singleton database connection
-        // Call DatabaseConnection.getInstance() to establish connection
         DatabaseConnection.getInstance();
 
         employeeDAO = new EmployeeDAO();
@@ -70,7 +74,9 @@ public class MainController {
         colFirstName.setCellValueFactory(new PropertyValueFactory<>("firstName"));
         colLastName.setCellValueFactory(new PropertyValueFactory<>("lastName"));
         colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
-        colDepartment.setCellValueFactory(new PropertyValueFactory<>("department"));
+        colDepartment.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getDepartmentName())
+        );
         colType.setCellValueFactory(new PropertyValueFactory<>("employeeType"));
         colSalary.setCellValueFactory(new PropertyValueFactory<>("baseSalary"));
 
@@ -78,6 +84,9 @@ public class MainController {
                 "Full-time", "Part-time", "Contractor"
         ));
         cmbEmployeeType.setValue("Full-time");
+
+        // Load departments into ComboBox
+        loadDepartments();
 
         loadEmployees();
 
@@ -99,6 +108,39 @@ public class MainController {
     }
 
     /**
+     * Load departments into ComboBox
+     */
+    private void loadDepartments() {
+        List<Department> departments = departmentDAO.getAllDepartments();
+        cmbDepartment.setItems(FXCollections.observableArrayList(departments));
+        cmbDepartment.setCellFactory(param -> new ListCell<Department>() {
+            @Override
+            protected void updateItem(Department department, boolean empty) {
+                super.updateItem(department, empty);
+                if (empty || department == null) {
+                    setText(null);
+                } else {
+                    setText(department.getDepartmentName());
+                }
+            }
+        });
+        cmbDepartment.setConverter(new StringConverter<Department>() {
+            @Override
+            public String toString(Department department) {
+                return department != null ? department.getDepartmentName() : "";
+            }
+
+            @Override
+            public Department fromString(String string) {
+                return null; // Not needed for display only
+            }
+        });
+
+        // Set prompt text
+        cmbDepartment.setPromptText("Select Department");
+    }
+
+    /**
      * Display selected employee details (Ali Hassan Ali)
      */
     private void displayEmployeeDetails(Employee employee) {
@@ -108,7 +150,7 @@ public class MainController {
         txtEmail.setText(employee.getEmail());
         txtPhone.setText(employee.getPhoneNumber());
         dateHire.setValue(employee.getHireDate());
-        txtDepartment.setText(employee.getDepartment());
+        cmbDepartment.setValue(employee.getDepartment()); // Updated to use ComboBox
         txtSalary.setText(String.valueOf(employee.getBaseSalary()));
         cmbEmployeeType.setValue(employee.getEmployeeType());
     }
@@ -122,19 +164,25 @@ public class MainController {
     private void handleAddEmployee() {
         try {
             // Get input values from the form
-            int id = Integer.parseInt(txtEmployeeId.getText());
+            int id = (int)(Math.random() * 10000) + 1;
             String firstName = txtFirstName.getText();
             String lastName = txtLastName.getText();
             String email = txtEmail.getText();
             String phone = txtPhone.getText();
             LocalDate hireDate = dateHire.getValue();
-            String department = txtDepartment.getText();
+            Department department = cmbDepartment.getValue(); // Get selected Department object
             double salary = Double.parseDouble(txtSalary.getText());
             String type = cmbEmployeeType.getValue();
 
             // Validate inputs
             if (firstName.isEmpty() || lastName.isEmpty()) {
                 lblStatus.setText("✗ First name and last name are required.");
+                lblStatus.setStyle("-fx-text-fill: red;");
+                return;
+            }
+
+            if (department == null) {
+                lblStatus.setText("✗ Please select a department.");
                 lblStatus.setStyle("-fx-text-fill: red;");
                 return;
             }
@@ -150,7 +198,7 @@ public class MainController {
                 // For Full-time: additionalParam1 = 20 (annual leave days)
                 newEmployee = EmployeeFactory.createEmployee(
                         type, id, firstName, lastName, email, phone,
-                        hireDate, department, salary,
+                        hireDate, department, salary, // Pass Department object
                         20, null  // 20 annual leave days
                 );
             }
@@ -158,7 +206,7 @@ public class MainController {
                 // For Part-time: additionalParam1 = 20 (hours/week), additionalParam2 = 15.0 (hourly rate)
                 newEmployee = EmployeeFactory.createEmployee(
                         type, id, firstName, lastName, email, phone,
-                        hireDate, department, salary,
+                        hireDate, department, salary, // Pass Department object
                         20, 15.0  // 20 hours per week, $15 per hour
                 );
             }
@@ -167,7 +215,7 @@ public class MainController {
                 LocalDate contractEndDate = LocalDate.now().plusYears(1);
                 newEmployee = EmployeeFactory.createEmployee(
                         type, id, firstName, lastName, email, phone,
-                        hireDate, department, salary,
+                        hireDate, department, salary, // Pass Department object
                         contractEndDate, "General Project"
                 );
             }
@@ -201,7 +249,6 @@ public class MainController {
      */
     @FXML
     private void handleCreateDepartment() {
-        // Create a dialog to get department type from user
         TextInputDialog dialog = new TextInputDialog("IT");
         dialog.setTitle("Create Department");
         dialog.setHeaderText("Create New Department Using Factory Pattern");
@@ -215,13 +262,25 @@ public class MainController {
 
         dialog.showAndWait().ifPresent(type -> {
             try {
-                // Generate random ID for the department
+                // Check if department already exists (case-insensitive)
+                Optional<Department> existing = departmentDAO.getDepartmentByNameIgnoreCase(type);
+                if (existing.isPresent()) {
+                    // Show error inside the dialog as an alert
+                    Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                    errorAlert.setTitle("Department Already Exists");
+                    errorAlert.setHeaderText("Cannot create department");
+                    errorAlert.setContentText("A department named '" + type + "' already exists.");
+                    errorAlert.showAndWait();
+                    return; // Stop further processing
+                }
+
+                // Generate random ID
                 int id = (int)(Math.random() * 1000) + 1;
 
-                // Use DepartmentFactory to create department
+                // Create department via factory
                 Department dept = DepartmentFactory.createDepartment(type, id);
 
-                // Insert department into database
+                // Insert department
                 if (departmentDAO.insertDepartment(dept)) {
                     lblStatus.setText(
                             "✓ Department created using Factory Pattern!\n" +
@@ -231,7 +290,10 @@ public class MainController {
                     );
                     lblStatus.setStyle("-fx-text-fill: green;");
 
-                    // Show success alert with details
+                    // Reload departments in ComboBox
+                    loadDepartments();
+
+                    // Show success alert
                     Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
                     successAlert.setTitle("Department Created");
                     successAlert.setHeaderText("Department Created Successfully!");
@@ -250,13 +312,6 @@ public class MainController {
             } catch (IllegalArgumentException e) {
                 lblStatus.setText("✗ Error: " + e.getMessage());
                 lblStatus.setStyle("-fx-text-fill: red;");
-
-                // Show error alert
-                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                errorAlert.setTitle("Invalid Department Type");
-                errorAlert.setHeaderText("Cannot Create Department");
-                errorAlert.setContentText(e.getMessage());
-                errorAlert.showAndWait();
             } catch (Exception e) {
                 lblStatus.setText("✗ Error creating department: " + e.getMessage());
                 lblStatus.setStyle("-fx-text-fill: red;");
@@ -278,11 +333,12 @@ public class MainController {
             String lastName = txtLastName.getText();
 
             // TODO: FATMA MOHAMED - Use EmployeeBuilder with method chaining
+            // Note: You'll need to update EmployeeBuilder to accept Department object
             // Employee emp = new EmployeeBuilder(id, firstName, lastName)
             //     .email(txtEmail.getText())
             //     .phoneNumber(txtPhone.getText())
             //     .hireDate(dateHire.getValue())
-            //     .department(txtDepartment.getText())
+            //     .department(cmbDepartment.getValue()) // Updated
             //     .baseSalary(Double.parseDouble(txtSalary.getText()))
             //     .employeeType(cmbEmployeeType.getValue())
             //     .build();
@@ -493,7 +549,7 @@ public class MainController {
             selected.setLastName(txtLastName.getText());
             selected.setEmail(txtEmail.getText());
             selected.setPhoneNumber(txtPhone.getText());
-            selected.setDepartment(txtDepartment.getText());
+            selected.setDepartment(cmbDepartment.getValue()); // Updated to use ComboBox
             selected.setBaseSalary(Double.parseDouble(txtSalary.getText()));
 
             if (employeeDAO.updateEmployee(selected)) {
@@ -569,7 +625,7 @@ public class MainController {
         txtEmail.clear();
         txtPhone.clear();
         dateHire.setValue(LocalDate.now());
-        txtDepartment.clear();
+        cmbDepartment.getSelectionModel().clearSelection(); // Clear ComboBox selection
         txtSalary.clear();
         cmbEmployeeType.setValue("Full-time");
         employeeTable.getSelectionModel().clearSelection();

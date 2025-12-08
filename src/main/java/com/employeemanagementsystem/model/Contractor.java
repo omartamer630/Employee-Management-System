@@ -11,7 +11,7 @@ public class Contractor extends Employee {
     private String projectName;
 
     public Contractor(int employeeId, String firstName, String lastName, String email,
-                      String phoneNumber, LocalDate hireDate, String department,
+                      String phoneNumber, LocalDate hireDate, Department department,
                       double baseSalary, LocalDate contractEndDate, String projectName) {
         super(employeeId, firstName, lastName, email, phoneNumber, hireDate,
                 department, baseSalary, "Contractor");

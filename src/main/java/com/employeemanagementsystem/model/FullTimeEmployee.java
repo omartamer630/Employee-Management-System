@@ -10,12 +10,13 @@ public class FullTimeEmployee extends Employee {
     private int annualLeaveDays;
 
     public FullTimeEmployee(int employeeId, String firstName, String lastName, String email,
-                            String phoneNumber, LocalDate hireDate, String department,
+                            String phoneNumber, LocalDate hireDate, Department department, // Changed
                             double baseSalary, int annualLeaveDays) {
         super(employeeId, firstName, lastName, email, phoneNumber, hireDate,
-                department, baseSalary, "Full-time");
+                department, baseSalary, "Full-time"); // Changed
         this.annualLeaveDays = annualLeaveDays;
     }
+
 
     @Override
     public double calculateSalary() {
