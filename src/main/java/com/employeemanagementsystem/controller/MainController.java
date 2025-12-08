@@ -17,6 +17,7 @@ import java.time.LocalDate;
 /**
  * Main Controller for the Employee Management System (Ali Hassan Ali)
  * Integrates all design patterns and manages the GUI
+ *
  */
 public class MainController {
 
@@ -120,6 +121,7 @@ public class MainController {
     @FXML
     private void handleAddEmployee() {
         try {
+            // Get input values from the form
             int id = Integer.parseInt(txtEmployeeId.getText());
             String firstName = txtFirstName.getText();
             String lastName = txtLastName.getText();
@@ -130,25 +132,67 @@ public class MainController {
             double salary = Double.parseDouble(txtSalary.getText());
             String type = cmbEmployeeType.getValue();
 
-            // TODO: OMAR TAMER - Use EmployeeFactory.createEmployee()
-            // For Full-time: additionalParam1 = 20 (annual leave days), additionalParam2 = null
-            // For Part-time: additionalParam1 = 20 (hours/week), additionalParam2 = 15.0 (hourly rate)
-            // For Contractor: additionalParam1 = LocalDate (end date), additionalParam2 = "Project Name"
+            // Validate inputs
+            if (firstName.isEmpty() || lastName.isEmpty()) {
+                lblStatus.setText("✗ First name and last name are required.");
+                lblStatus.setStyle("-fx-text-fill: red;");
+                return;
+            }
+
+            if (hireDate == null) {
+                hireDate = LocalDate.now();
+            }
+
+            // Use EmployeeFactory to create the appropriate employee type
             Employee newEmployee = null;
 
+            if (type.equalsIgnoreCase("Full-time")) {
+                // For Full-time: additionalParam1 = 20 (annual leave days)
+                newEmployee = EmployeeFactory.createEmployee(
+                        type, id, firstName, lastName, email, phone,
+                        hireDate, department, salary,
+                        20, null  // 20 annual leave days
+                );
+            }
+            else if (type.equalsIgnoreCase("Part-time")) {
+                // For Part-time: additionalParam1 = 20 (hours/week), additionalParam2 = 15.0 (hourly rate)
+                newEmployee = EmployeeFactory.createEmployee(
+                        type, id, firstName, lastName, email, phone,
+                        hireDate, department, salary,
+                        20, 15.0  // 20 hours per week, $15 per hour
+                );
+            }
+            else if (type.equalsIgnoreCase("Contractor")) {
+                // For Contractor: additionalParam1 = LocalDate (end date), additionalParam2 = "Project Name"
+                LocalDate contractEndDate = LocalDate.now().plusYears(1);
+                newEmployee = EmployeeFactory.createEmployee(
+                        type, id, firstName, lastName, email, phone,
+                        hireDate, department, salary,
+                        contractEndDate, "General Project"
+                );
+            }
+
+            // Insert employee into database
             if (newEmployee != null && employeeDAO.insertEmployee(newEmployee)) {
                 loadEmployees();
                 clearFields();
-                lblStatus.setText("✓ Employee added using Factory Pattern!");
+                lblStatus.setText("✓ Employee added using Factory Pattern! Type: " + type);
                 lblStatus.setStyle("-fx-text-fill: green;");
             } else {
                 lblStatus.setText("✗ Failed to add employee.");
                 lblStatus.setStyle("-fx-text-fill: red;");
             }
 
+        } catch (NumberFormatException e) {
+            lblStatus.setText("✗ Error: Invalid number format. Please check ID and Salary.");
+            lblStatus.setStyle("-fx-text-fill: red;");
+        } catch (IllegalArgumentException e) {
+            lblStatus.setText("✗ Error: " + e.getMessage());
+            lblStatus.setStyle("-fx-text-fill: red;");
         } catch (Exception e) {
             lblStatus.setText("✗ Error: " + e.getMessage());
             lblStatus.setStyle("-fx-text-fill: red;");
+            e.printStackTrace();
         }
     }
 
@@ -157,18 +201,67 @@ public class MainController {
      */
     @FXML
     private void handleCreateDepartment() {
+        // Create a dialog to get department type from user
         TextInputDialog dialog = new TextInputDialog("IT");
         dialog.setTitle("Create Department");
-        dialog.setContentText("Enter type (HR/IT/Finance/Sales/Operations):");
+        dialog.setHeaderText("Create New Department Using Factory Pattern");
+        dialog.setContentText("Enter department type:");
+
+        // Add helpful information
+        Label helpLabel = new Label(
+                "Valid types:\n• HR\n• IT\n• Finance\n• Sales\n• Operations"
+        );
+        dialog.getDialogPane().setExpandableContent(helpLabel);
 
         dialog.showAndWait().ifPresent(type -> {
-            // TODO: OMAR TAMER - Use DepartmentFactory.createDepartment()
-            // Generate random ID: int id = (int)(Math.random() * 1000) + 1;
-            // Department dept = DepartmentFactory.createDepartment(type, id);
-            // Then: departmentDAO.insertDepartment(dept);
+            try {
+                // Generate random ID for the department
+                int id = (int)(Math.random() * 1000) + 1;
 
-            lblStatus.setText("✓ Department created using Factory Pattern!");
-            lblStatus.setStyle("-fx-text-fill: green;");
+                // Use DepartmentFactory to create department
+                Department dept = DepartmentFactory.createDepartment(type, id);
+
+                // Insert department into database
+                if (departmentDAO.insertDepartment(dept)) {
+                    lblStatus.setText(
+                            "✓ Department created using Factory Pattern!\n" +
+                                    "Name: " + dept.getDepartmentName() + "\n" +
+                                    "Manager: " + dept.getManagerName() + "\n" +
+                                    "Location: " + dept.getLocation()
+                    );
+                    lblStatus.setStyle("-fx-text-fill: green;");
+
+                    // Show success alert with details
+                    Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+                    successAlert.setTitle("Department Created");
+                    successAlert.setHeaderText("Department Created Successfully!");
+                    successAlert.setContentText(
+                            "Department: " + dept.getDepartmentName() + "\n" +
+                                    "ID: " + dept.getDepartmentId() + "\n" +
+                                    "Manager: " + dept.getManagerName() + "\n" +
+                                    "Location: " + dept.getLocation()
+                    );
+                    successAlert.showAndWait();
+                } else {
+                    lblStatus.setText("✗ Failed to create department in database.");
+                    lblStatus.setStyle("-fx-text-fill: red;");
+                }
+
+            } catch (IllegalArgumentException e) {
+                lblStatus.setText("✗ Error: " + e.getMessage());
+                lblStatus.setStyle("-fx-text-fill: red;");
+
+                // Show error alert
+                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                errorAlert.setTitle("Invalid Department Type");
+                errorAlert.setHeaderText("Cannot Create Department");
+                errorAlert.setContentText(e.getMessage());
+                errorAlert.showAndWait();
+            } catch (Exception e) {
+                lblStatus.setText("✗ Error creating department: " + e.getMessage());
+                lblStatus.setStyle("-fx-text-fill: red;");
+                e.printStackTrace();
+            }
         });
     }
 
