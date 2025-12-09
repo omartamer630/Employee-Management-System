@@ -7,106 +7,108 @@ import java.util.Map;
 
 /**
  * PROTOTYPE PATTERN - Employee Prototype Registry
- * Maintains a registry of prototype employee objects that can be cloned
- * This is useful when creating similar objects is expensive or complex
- * Instead of creating from scratch, we clone existing prototypes and modify them
+ * BY: SHAHD AMR
  */
 public class EmployeePrototypeRegistry {
-    // Store prototype employees
     private static Map<String, Employee> prototypes = new HashMap<>();
 
     /**
-     * Initialize the registry with common employee prototypes
-     * Call this once when the application starts
+     * Initialize prototypes - called once when app starts
      */
     public static void initializePrototypes() {
-        // TODO: Create prototype employees and add them to the registry
-        // Create sample employees for each type that can be cloned later
-        //
-        // Example structure:
-        // 1. Create a FullTimeEmployee prototype with default values
-        //    - Use generic values: id=0, name="Prototype", department="General", salary=5000
-        // 2. Create a PartTimeEmployee prototype
-        // 3. Create a Contractor prototype
-        // 4. Add each to the prototypes map with keys like "fulltime", "parttime", "contractor"
+        Department generalDept = new Department(0, "General", "TBD", "TBD");
 
+        // Create Full-time prototype
+        FullTimeEmployee fullTime = new FullTimeEmployee(
+                0, "Prototype", "FullTime", "prototype@company.com", "000-000-0000",
+                LocalDate.now(), generalDept, 5000.0, 20
+        );
+
+        // Create Part-time prototype
+        PartTimeEmployee partTime = new PartTimeEmployee(
+                0, "Prototype", "PartTime", "prototype@company.com", "000-000-0000",
+                LocalDate.now(), generalDept, 3000.0, 20, 15.0
+        );
+
+        // Create Contractor prototype
+        Contractor contractor = new Contractor(
+                0, "Prototype", "Contractor", "prototype@company.com", "000-000-0000",
+                LocalDate.now(), generalDept, 7000.0, LocalDate.now().plusYears(1), "General Project"
+        );
+
+        // Add to registry
+        prototypes.put("fulltime", fullTime);
+        prototypes.put("parttime", partTime);
+        prototypes.put("contractor", contractor);
+
+        System.out.println("✓ Prototype Registry initialized!");
     }
 
     /**
-     * Add a prototype employee to the registry
+     * Add a prototype to registry
      */
     public static void addPrototype(String key, Employee prototype) {
-        // TODO: Implement method to add a prototype
-        // Simply put the prototype in the map with the given key
-
+        prototypes.put(key, prototype);
     }
 
     /**
-     * Get a cloned employee from a prototype
-     * This clones the prototype and returns a new object with the same properties
+     * Get a cloned employee from prototype
      */
     public static Employee getPrototype(String key) {
-        // TODO: Implement prototype cloning logic
-        // 1. Get the prototype from the map using the key
-        // 2. If prototype exists, clone it using the clone() method
-        // 3. Return the cloned employee
-        // 4. If prototype doesn't exist, return null or throw exception
-
-        return null;
+        Employee prototype = prototypes.get(key);
+        if (prototype == null) {
+            return null;
+        }
+        return prototype.clone();
     }
 
     /**
-     * Clone a prototype and customize it with new values
-     * This is the main advantage of the prototype pattern - easy customization
+     * Clone and customize with new values
      */
     public static Employee cloneAndCustomize(String prototypeKey, int newId,
                                              String firstName, String lastName,
                                              String email, String department) {
-        // TODO: Implement clone and customize logic
-        // 1. Get a clone of the prototype using getPrototype method
-        // 2. If clone is not null, set the new values:
-        //    - Set employee ID to newId
-        //    - Set first name to firstName
-        //    - Set last name to lastName
-        //    - Set email to email
-        //    - Set department to department
-        // 3. Return the customized clone
-        // 4. If prototype doesn't exist, return null
+        // Get clone
+        Employee clone = getPrototype(prototypeKey);
+        if (clone == null) {
+            return null;
+        }
 
-        return null;
+        // Customize
+        clone.setEmployeeId(newId);
+        clone.setFirstName(firstName);
+        clone.setLastName(lastName);
+        clone.setEmail(email);
+
+        Department dept = new Department(0, department, "Manager", "Location");
+        clone.setDepartment(dept);
+
+        return clone;
     }
 
     /**
-     * Check if a prototype exists in the registry
+     * Check if prototype exists
      */
     public static boolean hasPrototype(String key) {
-        // TODO: Check if prototype exists in map
-        // Return true if key exists in prototypes map, false otherwise
-
-        return false;
+        return prototypes.containsKey(key);
     }
 
     /**
-     * Get all available prototype keys
+     * Get all prototype keys
      */
     public static String[] getAvailablePrototypes() {
-        // TODO: Return array of all prototype keys
-        // Convert the keySet of prototypes map to an array and return it
-
-        return new String[0];
+        return prototypes.keySet().toArray(new String[0]);
     }
 
     /**
-     * Remove a prototype from the registry
+     * Remove a prototype
      */
     public static void removePrototype(String key) {
-        // TODO: Remove prototype from map
-        // Remove the entry with the given key from prototypes map
-
+        prototypes.remove(key);
     }
 
     /**
-     * Clear all prototypes (useful for testing or reset)
+     * Clear all prototypes
      */
     public static void clearPrototypes() {
         prototypes.clear();

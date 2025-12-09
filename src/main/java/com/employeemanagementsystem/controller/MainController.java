@@ -358,10 +358,14 @@ public class MainController {
     // ==================== SHAHD AMR - PROTOTYPE PATTERN ====================
 
     /**
-     * Clone employee using Prototype Pattern (Shahd Amr)
+     * Clone employee using Prototype Pattern
+     * BY: SHAHD AMR
+     *
+     * Replace the handleCloneEmployee method in MainController.java with this code:
      */
     @FXML
     private void handleCloneEmployee() {
+        // Check if employee is selected
         Employee selected = employeeTable.getSelectionModel().getSelectedItem();
 
         if (selected == null) {
@@ -371,25 +375,28 @@ public class MainController {
         }
 
         try {
-            // TODO: SHAHD AMR - Clone employee using one of these methods:
-            //
-            // Method 1: Direct clone
-            // Employee clone = selected.clone();
-            // clone.setEmployeeId((int)(Math.random() * 10000) + 1000);
-            // clone.setFirstName("Copy of " + clone.getFirstName());
-            //
-            // Method 2: Use EmployeePrototypeRegistry
-            // int newId = (int)(Math.random() * 10000) + 1000;
-            // Employee clone = EmployeePrototypeRegistry.cloneAndCustomize(
-            //     selected.getEmployeeType().toLowerCase(),
-            //     newId, "Jane", "Doe", "jane@company.com", "IT"
-            // );
-            //
-            // Then insert: employeeDAO.insertEmployee(clone);
-            // loadEmployees();
+            // Step 1: Clone the selected employee
+            Employee clone = selected.clone();
 
-            lblStatus.setText("✓ Employee cloned using Prototype Pattern!");
-            lblStatus.setStyle("-fx-text-fill: green;");
+            // Step 2: Give it a new ID
+            int newId = (int)(Math.random() * 10000) + 1000;
+            clone.setEmployeeId(newId);
+
+            // Step 3: Change the name so we know it's a copy
+            clone.setFirstName("Copy of " + clone.getFirstName());
+            clone.setEmail("copy." + clone.getEmail());
+
+            // Step 4: Save to database
+            if (employeeDAO.insertEmployee(clone)) {
+                loadEmployees();
+                displayEmployeeDetails(clone);
+
+                lblStatus.setText("✓ Employee cloned! New ID: " + newId);
+                lblStatus.setStyle("-fx-text-fill: green;");
+            } else {
+                lblStatus.setText("✗ Failed to save cloned employee.");
+                lblStatus.setStyle("-fx-text-fill: red;");
+            }
 
         } catch (Exception e) {
             lblStatus.setText("✗ Error: " + e.getMessage());

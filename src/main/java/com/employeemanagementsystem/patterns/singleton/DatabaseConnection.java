@@ -18,7 +18,7 @@ public class DatabaseConnection {
     private static final String URL_WITHOUT_DB = "jdbc:mysql://localhost:3306/?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
     private static final String URL_WITH_DB = "jdbc:mysql://localhost:3306/" + DB_NAME + "?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
     private static final String USERNAME = "root";
-    private static final String PASSWORD = "khemu123456";
+    private static final String PASSWORD = "RootPass123";
 
     private DatabaseConnection() {
         try {
