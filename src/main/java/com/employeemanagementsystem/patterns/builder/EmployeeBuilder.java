@@ -19,7 +19,13 @@ public class EmployeeBuilder {
     private String email = "";
     private String phoneNumber = "";
     private LocalDate hireDate = LocalDate.now();
-    private String department = "General";
+    private Department department = new Department(
+            1,
+            "Human Resources",
+            "HR Manager",
+            "Building A, Floor 1"
+    );
+
     private double baseSalary = 0.0;
     private String employeeType = "fulltime";
 
@@ -39,149 +45,123 @@ public class EmployeeBuilder {
         this.lastName = lastName;
     }
 
-    /**
-     * Builder method for email
-     */
     public EmployeeBuilder email(String email) {
-        // TODO: Implement builder pattern method
-        // Set the email field to the provided value
-        // Return 'this' to allow method chaining
-
+        this.email = email;
         return this;
     }
 
-    /**
-     * Builder method for phone number
-     */
     public EmployeeBuilder phoneNumber(String phoneNumber) {
-        // TODO: Implement builder pattern method
-        // Set the phoneNumber field
-        // Return 'this' for method chaining
-
+        this.phoneNumber = phoneNumber;
         return this;
     }
 
-    /**
-     * Builder method for hire date
-     */
     public EmployeeBuilder hireDate(LocalDate hireDate) {
-        // TODO: Implement builder pattern method
-        // Set the hireDate field
-        // Return 'this' for method chaining
-
+        this.hireDate = hireDate;
         return this;
     }
 
-    /**
-     * Builder method for department
-     */
-    public EmployeeBuilder department(String department) {
-        // TODO: Implement builder pattern method
-        // Set the department field
-        // Return 'this' for method chaining
-
+    public EmployeeBuilder department(Department department) {
+        this.department = department;
         return this;
     }
 
-    /**
-     * Builder method for base salary
-     */
     public EmployeeBuilder baseSalary(double baseSalary) {
-        // TODO: Implement builder pattern method
-        // Set the baseSalary field
-        // Return 'this' for method chaining
-
+        this.baseSalary = baseSalary;
         return this;
     }
 
-    /**
-     * Builder method for employee type
-     */
     public EmployeeBuilder employeeType(String employeeType) {
-        // TODO: Implement builder pattern method
-        // Set the employeeType field
-        // Return 'this' for method chaining
-
+        this.employeeType = employeeType.toLowerCase();
         return this;
     }
 
-    /**
-     * Builder method for annual leave days (Full-time specific)
-     */
     public EmployeeBuilder annualLeaveDays(int annualLeaveDays) {
-        // TODO: Implement builder pattern method
-        // Set the annualLeaveDays field
-        // Return 'this' for method chaining
-
+        this.annualLeaveDays = annualLeaveDays;
         return this;
     }
 
-    /**
-     * Builder method for hours per week (Part-time specific)
-     */
     public EmployeeBuilder hoursPerWeek(int hoursPerWeek) {
-        // TODO: Implement builder pattern method
-        // Set the hoursPerWeek field
-        // Return 'this' for method chaining
-
+        this.hoursPerWeek = hoursPerWeek;
         return this;
     }
 
-    /**
-     * Builder method for hourly rate (Part-time specific)
-     */
     public EmployeeBuilder hourlyRate(double hourlyRate) {
-        // TODO: Implement builder pattern method
-        // Set the hourlyRate field
-        // Return 'this' for method chaining
-
+        this.hourlyRate = hourlyRate;
         return this;
     }
 
-    /**
-     * Builder method for contract end date (Contractor specific)
-     */
     public EmployeeBuilder contractEndDate(LocalDate contractEndDate) {
-        // TODO: Implement builder pattern method
-        // Set the contractEndDate field
-        // Return 'this' for method chaining
-
+        this.contractEndDate = contractEndDate;
         return this;
     }
 
-    /**
-     * Builder method for project name (Contractor specific)
-     */
     public EmployeeBuilder projectName(String projectName) {
-        // TODO: Implement builder pattern method
-        // Set the projectName field
-        // Return 'this' for method chaining
-
+        this.projectName = projectName;
         return this;
     }
 
     /**
      * Build method - creates and returns the final Employee object
-     * This is called last after setting all desired parameters
      */
     public Employee build() {
 
-        // TODO: Implement the build method
-        // Based on employeeType, create the appropriate employee object
-        // Use the fields set via builder methods
-        //
-        // If employeeType contains "fulltime" or "full":
-        //    - Create FullTimeEmployee with annualLeaveDays
-        //
-        // If employeeType contains "parttime" or "part":
-        //    - Create PartTimeEmployee with hoursPerWeek and hourlyRate
-        //
-        // If employeeType contains "contractor" or "contract":
-        //    - Create Contractor with contractEndDate and projectName
-        //
-        // Default to FullTimeEmployee if type doesn't match
-        // Return the created employee object
+        String type = employeeType.toLowerCase();
 
-        return null;
+        if (type.contains("full")) {
+            return new FullTimeEmployee(
+                    employeeId,
+                    firstName,
+                    lastName,
+                    email,
+                    phoneNumber,
+                    hireDate,
+                    department,
+                    baseSalary,
+                    annualLeaveDays
+            );
+        }
+
+        if (type.contains("part")) {
+            return new PartTimeEmployee(
+                    employeeId,
+                    firstName,
+                    lastName,
+                    email,
+                    phoneNumber,
+                    hireDate,
+                    department,
+                    baseSalary,
+                    (int) hourlyRate,
+                    hoursPerWeek
+            );
+        }
+
+        if (type.contains("contract")) {
+            return new Contractor(
+                    employeeId,
+                    firstName,
+                    lastName,
+                    email,
+                    phoneNumber,
+                    hireDate,
+                    department,
+                    baseSalary,
+                    contractEndDate,
+                    projectName
+            );
+        }
+
+        // Default fallback: Full time
+        return new FullTimeEmployee(
+                employeeId,
+                firstName,
+                lastName,
+                email,
+                phoneNumber,
+                hireDate,
+                department,
+                baseSalary,
+                annualLeaveDays
+        );
     }
 }

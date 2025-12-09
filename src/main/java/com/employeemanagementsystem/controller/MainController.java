@@ -33,6 +33,7 @@ public class MainController {
     @FXML private TableColumn<Employee, String> colFirstName;
     @FXML private TableColumn<Employee, String> colLastName;
     @FXML private TableColumn<Employee, String> colEmail;
+    @FXML private TableColumn<Employee, String> colPhone;
     @FXML private TableColumn<Employee, String> colDepartment;
     @FXML private TableColumn<Employee, String> colType;
     @FXML private TableColumn<Employee, Double> colSalary;
@@ -73,6 +74,7 @@ public class MainController {
         colFirstName.setCellValueFactory(new PropertyValueFactory<>("firstName"));
         colLastName.setCellValueFactory(new PropertyValueFactory<>("lastName"));
         colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
+        colPhone.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
         colDepartment.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getDepartmentName())
         );
@@ -326,22 +328,61 @@ public class MainController {
     @FXML
     private void handleAddEmployeeWithBuilder() {
         try {
-            int id = (int)(Math.random() * 10000) + 1;
+            // Generate random employee ID
+            int id = (int) (Math.random() * 10000) + 1;
+
+            // Required fields
             String firstName = txtFirstName.getText();
             String lastName = txtLastName.getText();
 
-            // TODO: FATMA MOHAMED - Use EmployeeBuilder with method chaining
-            // Note: You'll need to update EmployeeBuilder to accept Department object
-            // Employee emp = new EmployeeBuilder(id, firstName, lastName)
-            //     .email(txtEmail.getText())
-            //     .phoneNumber(txtPhone.getText())
-            //     .hireDate(dateHire.getValue())
-            //     .department(cmbDepartment.getValue()) // Updated
-            //     .baseSalary(Double.parseDouble(txtSalary.getText()))
-            //     .employeeType(cmbEmployeeType.getValue())
-            //     .build();
-            Employee newEmployee = null;
+            if (firstName == null || firstName.isBlank() || lastName == null || lastName.isBlank()) {
+                lblStatus.setText("✗ First name and last name are required!");
+                lblStatus.setStyle("-fx-text-fill: red;");
+                return;
+            }
 
+            // Optional fields with defaults
+            String email = txtEmail.getText();
+            if (email == null || email.isBlank()) email = "not_provided@example.com";
+
+            String phone = txtPhone.getText();
+            if (phone == null || phone.isBlank()) phone = "0000000000";
+
+            LocalDate hireDate = dateHire.getValue();
+            if (hireDate == null) hireDate = LocalDate.now();
+
+            Department department = cmbDepartment.getValue();
+            if (department == null) {
+                department = new Department(1, "Human Resources", "HR Manager", "Building A, Floor 1");
+            }
+
+            double salary = 0.0;
+            try {
+                salary = Double.parseDouble(txtSalary.getText());
+            } catch (NumberFormatException e) {
+                salary = 0.0; // default salary
+            }
+
+            String employeeType = cmbEmployeeType.getValue();
+            if (employeeType == null || employeeType.isBlank()) employeeType = "fulltime";
+
+            // Build Employee using EmployeeBuilder
+            Employee newEmployee = new EmployeeBuilder(id, firstName, lastName)
+                    .email(email)
+                    .phoneNumber(phone)
+                    .hireDate(hireDate)
+                    .department(department)
+                    .baseSalary(salary)
+                    .employeeType(employeeType)
+                    // Type-specific defaults
+                    .annualLeaveDays(employeeType.toLowerCase().contains("full") ? 20 : 0)
+                    .hoursPerWeek(employeeType.toLowerCase().contains("part") ? 20 : 0)
+                    .hourlyRate(employeeType.toLowerCase().contains("part") ? 15.0 : 0.0)
+                    .contractEndDate(employeeType.toLowerCase().contains("contract") ? LocalDate.now().plusYears(1) : null)
+                    .projectName(employeeType.toLowerCase().contains("contract") ? "General Project" : null)
+                    .build();
+
+            // Insert employee
             if (newEmployee != null && employeeDAO.insertEmployee(newEmployee)) {
                 loadEmployees();
                 clearFields();
@@ -354,6 +395,8 @@ public class MainController {
             lblStatus.setStyle("-fx-text-fill: red;");
         }
     }
+
+
 
     // ==================== SHAHD AMR - PROTOTYPE PATTERN ====================
 

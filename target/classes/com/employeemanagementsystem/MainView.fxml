@@ -122,6 +122,7 @@
                         <TableColumn fx:id="colFirstName" text="First Name" prefWidth="100"/>
                         <TableColumn fx:id="colLastName" text="Last Name" prefWidth="100"/>
                         <TableColumn fx:id="colEmail" text="Email" prefWidth="150"/>
+                        <TableColumn fx:id="colPhone" text="Phone Number" prefWidth="150"/>
                         <TableColumn fx:id="colDepartment" text="Department" prefWidth="100"/>
                         <TableColumn fx:id="colType" text="Type" prefWidth="100"/>
                         <TableColumn fx:id="colSalary" text="Salary" prefWidth="80"/>
