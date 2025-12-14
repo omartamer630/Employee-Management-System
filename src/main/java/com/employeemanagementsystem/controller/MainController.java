@@ -57,7 +57,7 @@ public class MainController {
     private EmployeeDAO employeeDAO;
     private DepartmentDAO departmentDAO;
     private ObservableList<Employee> employeeList;
-
+    private Set<Integer> certifiedEmployees = new HashSet<>();
     /**
      * Initialize the controller (Ali Hassan Ali)
      */
