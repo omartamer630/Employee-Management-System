@@ -90,6 +90,12 @@
                 </HBox>
 
                 <HBox spacing="10">
+                    <Button fx:id="btnApplyCertification" text="Apply Certification (Decorator)"
+                            onAction="#handleApplyCertification"
+                            style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
+                </HBox>
+
+                <HBox spacing="10">
                     <Button fx:id="btnCloneEmployee" text="Clone Employee (Prototype)"
                             onAction="#handleCloneEmployee"
                             style="-fx-background-color: #c0392b; -fx-text-fill: white;"/>
