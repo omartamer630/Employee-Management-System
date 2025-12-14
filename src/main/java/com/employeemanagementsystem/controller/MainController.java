@@ -19,6 +19,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Main Controller for the Employee Management System (Ali Hassan Ali)
  * Integrates all design patterns and manages the GUI
@@ -550,6 +553,7 @@ public class MainController {
 
     /**
      * Apply certification decorator (Eyad Hesham)
+     * Wraps base payroll logic with certification rules
      */
     @FXML
     private void handleApplyCertification() {
@@ -561,17 +565,51 @@ public class MainController {
             return;
         }
 
-        try {
-            // TODO: EYAD HESHAM - Use CertificationDecorator
-            // Employee empWithCert = new CertificationDecorator(selected, "AWS Certified", 500.0);
-            // double newSalary = empWithCert.calculateSalary();
-            // String benefits = empWithCert.getBenefits();
-            // txtPayrollReport.setText("New Salary: $" + newSalary + "\n" + benefits);
+        // CHECK If employee already has certification
+        if (certifiedEmployees.contains(selected.getEmployeeId())) {
+            lblStatus.setText("✗ Employee already has AWS Certification!");
+            lblStatus.setStyle("-fx-text-fill: red;");
+            return;
+        }
 
-            lblStatus.setText("✓ Certification applied using Decorator Pattern!");
+        try {
+            // Log original state
+            System.out.println("Original Employee: " + selected.getFirstName() + " " + selected.getLastName());
+            double originalSalary = selected.calculateSalary();
+            System.out.println("Original Salary: $" + originalSalary);
+            System.out.println("Original Benefits: " + selected.getBenefits());
+
+            // Get payroll system instance
+            PayrollSystem payroll = PayrollSystem.getInstance();
+
+            // Get previous total paid
+            double previousTotalPaid = payroll.getTotalPaid(selected.getEmployeeId());
+            System.out.println("Previous Total Paid: $" + previousTotalPaid);
+
+            // Apply CertificationDecorator
+            Employee empWithCert = new CertificationDecorator(selected, "AWS Certified", 500.0);
+            double newSalary = empWithCert.calculateSalary();
+            String benefits = empWithCert.getBenefits();
+
+            // Log decorated state
+            System.out.println("\nAfter Decoration:");
+            System.out.println("New Salary: $" + newSalary);
+            System.out.println("Salary Increase: $" + (newSalary - originalSalary));
+            System.out.println("New Benefits: " + benefits);
+
+            certifiedEmployees.add(selected.getEmployeeId());
+            System.out.println("✓ Employee marked as certified");
+
+            payroll.processPayroll(empWithCert);
+
+
+            lblStatus.setText("✓ Certification applied & Payroll updated!");
             lblStatus.setStyle("-fx-text-fill: green;");
 
         } catch (Exception e) {
+            System.err.println("ERROR: " + e.getMessage());
+            e.printStackTrace();
+
             lblStatus.setText("✗ Error: " + e.getMessage());
             lblStatus.setStyle("-fx-text-fill: red;");
         }
