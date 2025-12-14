@@ -19,12 +19,7 @@ public class CertificationDecorator extends EmployeeDecorator {
 
     @Override
     public double calculateSalary() {
-        // TODO: Implement salary calculation with certification allowance
-        // Get base salary from decorated employee
-        // Add certification allowance
-        // Return the total
-
-        return 0.0;
+        return super.calculateSalary() + certificationAllowance;
     }
 
     @Override
@@ -32,9 +27,14 @@ public class CertificationDecorator extends EmployeeDecorator {
         // TODO: Add certification information to benefits
         // Get base benefits from decorated employee
         // Append certification name and allowance information
+        String certificationBenefit = String.format(
+                "Professional Certification: %s (Allowance: $%.2f)",
+                certificationName,
+                certificationAllowance
+        );
         // Return the enhanced benefits string
 
-        return "";
+        return super.getBenefits() + certificationBenefit;
     }
 
     public String getCertificationName() {
