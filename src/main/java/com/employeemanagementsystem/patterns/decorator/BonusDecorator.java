@@ -3,44 +3,70 @@ package com.employeemanagementsystem.patterns.decorator;
 import com.employeemanagementsystem.model.Employee;
 
 /**
- * Concrete Decorator - Adds bonus to employee salary
- * This decorator adds a performance bonus to the employee's salary
+ * Decorator that adds bonus compensation to an employee's salary.
+ * Implements the Decorator Pattern to dynamically add bonus functionality.
  */
 public class BonusDecorator extends EmployeeDecorator {
     private double bonusAmount;
     private String bonusReason;
 
+    /**
+     * Constructs a BonusDecorator wrapping an employee.
+     *
+     * @param employee The employee to decorate
+     * @param bonusAmount The bonus amount to add to salary
+     * @param bonusReason The reason for the bonus
+     */
     public BonusDecorator(Employee employee, double bonusAmount, String bonusReason) {
         super(employee);
         this.bonusAmount = bonusAmount;
         this.bonusReason = bonusReason;
     }
 
+    /**
+     * Calculates the total salary including the bonus.
+     * Uses the decorated employee's base salary and adds the bonus amount.
+     *
+     * @return The base salary plus bonus amount
+     */
     @Override
     public double calculateSalary() {
-        // TODO: Implement bonus calculation
-        // Get the base salary from decorated employee
-        // Add the bonus amount
-        // Return the total
-
-        return 0.0;
+        // Get base salary from the decorated employee
+        double baseSalary = decoratedEmployee.getBaseSalary();
+        return baseSalary + bonusAmount;
     }
 
+    /**
+     * Returns the benefits string with bonus information appended.
+     *
+     * @return The benefits including bonus details
+     */
     @Override
     public String getBenefits() {
-        // TODO: Add bonus information to benefits
-        // Get the base benefits from decorated employee
-        // Append bonus information (amount and reason)
-        // Return the enhanced benefits string
+        String baseBenefits = decoratedEmployee.getBenefits();
+        String bonusInfo = String.format("Bonus: $%.2f (%s)", bonusAmount, bonusReason);
 
-        return "";
+        if (baseBenefits == null || baseBenefits.isEmpty()) {
+            return bonusInfo;
+        }
+        return baseBenefits + ", " + bonusInfo;
     }
 
+    /**
+     * Gets the bonus amount.
+     *
+     * @return The bonus amount
+     */
     public double getBonusAmount() {
-        return bonusAmount;
+        return this.bonusAmount;
     }
 
+    /**
+     * Gets the reason for the bonus.
+     *
+     * @return The bonus reason
+     */
     public String getBonusReason() {
-        return bonusReason;
+        return this.bonusReason;
     }
 }

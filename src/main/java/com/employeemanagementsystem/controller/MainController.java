@@ -506,10 +506,10 @@ public class MainController {
 
         try {
             // TODO: ABDELRAHMAN MAGDY - Use BonusDecorator
-            // Employee empWithBonus = new BonusDecorator(selected, 1000.0, "Performance Bonus");
-            // double newSalary = empWithBonus.calculateSalary();
-            // String benefits = empWithBonus.getBenefits();
-            // txtPayrollReport.setText("New Salary: $" + newSalary + "\n" + benefits);
+             Employee empWithBonus = new BonusDecorator(selected, 1000.0, "Performance Bonus");
+             double newSalary = empWithBonus.calculateSalary();
+             String benefits = empWithBonus.getBenefits();
+             txtPayrollReport.setText("New Salary: $" + newSalary + "\n" + benefits);
 
             lblStatus.setText("✓ Bonus applied using Decorator Pattern!");
             lblStatus.setStyle("-fx-text-fill: green;");
@@ -535,10 +535,10 @@ public class MainController {
 
         try {
             // TODO: ABDELRAHMAN MAGDY - Use OvertimeDecorator
-            // Employee empWithOT = new OvertimeDecorator(selected, 10, 25.0);
-            // double newSalary = empWithOT.calculateSalary();
-            // String benefits = empWithOT.getBenefits();
-            // txtPayrollReport.setText("New Salary: $" + newSalary + "\n" + benefits);
+             Employee empWithOT = new OvertimeDecorator(selected, 10, 25.0);
+             double newSalary = empWithOT.calculateSalary();
+             String benefits = empWithOT.getBenefits();
+             txtPayrollReport.setText("New Salary: $" + newSalary + "\n" + benefits);
 
             lblStatus.setText("✓ Overtime applied using Decorator Pattern!");
             lblStatus.setStyle("-fx-text-fill: green;");
