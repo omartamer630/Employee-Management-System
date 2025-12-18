@@ -288,4 +288,22 @@ public class EmployeeDAO {
 
         return employees;
     }
+
+    public boolean updateSalary(int employeeId, double newSalary) {
+        String sql = "UPDATE employees SET base_salary = ? WHERE employee_id = ?";
+
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setDouble(1, newSalary);
+            pstmt.setInt(2, employeeId);
+
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error updating employee salary: " + e.getMessage());
+            return false;
+        }
+    }
 }

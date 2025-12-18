@@ -505,20 +505,34 @@ public class MainController {
         }
 
         try {
-            // TODO: ABDELRAHMAN MAGDY - Use BonusDecorator
-             Employee empWithBonus = new BonusDecorator(selected, 1000.0, "Performance Bonus");
-             double newSalary = empWithBonus.calculateSalary();
-             String benefits = empWithBonus.getBenefits();
-             txtPayrollReport.setText("New Salary: $" + newSalary + "\n" + benefits);
+            // Apply bonus using Decorator
+            Employee empWithBonus = new BonusDecorator(selected, 1000.0, "Performance Bonus");
+            double newSalary = empWithBonus.calculateSalary();
+            String benefits = empWithBonus.getBenefits();
 
-            lblStatus.setText("✓ Bonus applied using Decorator Pattern!");
-            lblStatus.setStyle("-fx-text-fill: green;");
+            // Update the salary in the database
+            EmployeeDAO employeeDAO = new EmployeeDAO();
+            boolean success = employeeDAO.updateSalary(selected.getEmployeeId(), newSalary);
+
+            if (success) {
+                txtPayrollReport.setText("New Salary: $" + newSalary + "\n" + benefits);
+                lblStatus.setText("✓ Bonus applied and salary updated in database!");
+                lblStatus.setStyle("-fx-text-fill: green;");
+
+                loadEmployees();
+                employeeTable.refresh();
+
+            } else {
+                lblStatus.setText("✗ Failed to update salary in database.");
+                lblStatus.setStyle("-fx-text-fill: red;");
+            }
 
         } catch (Exception e) {
             lblStatus.setText("✗ Error: " + e.getMessage());
             lblStatus.setStyle("-fx-text-fill: red;");
         }
     }
+
 
     /**
      * Apply overtime decorator (Abdelrahman Magdy)
