@@ -574,11 +574,19 @@ public class MainController {
                 lblStatus.setText("✓ Overtime applied and salary updated in database!");
                 lblStatus.setStyle("-fx-text-fill: green;");
 
-        } catch (Exception e) {
+                loadEmployees();
+                employeeTable.refresh();
+            } else {
+                lblStatus.setText("✗ Failed to update salary in database.");
+                lblStatus.setStyle("-fx-text-fill: red;");
+            }
+
+        } catch(Exception e) {
             lblStatus.setText("✗ Error: " + e.getMessage());
             lblStatus.setStyle("-fx-text-fill: red;");
         }
     }
+
 
     // ==================== EYAD HESHAM - DECORATOR PATTERN ====================
 
@@ -671,17 +679,11 @@ public class MainController {
 
             if (employeeDAO.updateEmployee(selected)) {
                 loadEmployees();
+                employeeTable.refresh();
                 lblStatus.setText("✓ Employee updated!");
                 lblStatus.setStyle("-fx-text-fill: green;");
             } else {
                 lblStatus.setText("✗ Update failed.");
-                lblStatus.setStyle("-fx-text-fill: red;");
-            }
-
-                loadEmployees();
-                employeeTable.refresh();
-            } else {
-                lblStatus.setText("✗ Failed to update salary in database.");
                 lblStatus.setStyle("-fx-text-fill: red;");
             }
 
