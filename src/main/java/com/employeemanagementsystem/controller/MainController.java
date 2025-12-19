@@ -195,33 +195,11 @@ public class MainController {
             }
 
             // Use EmployeeFactory to create the appropriate employee type
-            Employee newEmployee = null;
-
-            if (type.equalsIgnoreCase("Full-time")) {
-                // For Full-time: additionalParam1 = 20 (annual leave days)
-                newEmployee = EmployeeFactory.createEmployee(
-                        type, id, firstName, lastName, email, phone,
-                        hireDate, department, salary, // Pass Department object
-                        20, null  // 20 annual leave days
-                );
-            }
-            else if (type.equalsIgnoreCase("Part-time")) {
-                // For Part-time: additionalParam1 = 20 (hours/week), additionalParam2 = 15.0 (hourly rate)
-                newEmployee = EmployeeFactory.createEmployee(
-                        type, id, firstName, lastName, email, phone,
-                        hireDate, department, salary, // Pass Department object
-                        20, 15.0  // 20 hours per week, $15 per hour
-                );
-            }
-            else if (type.equalsIgnoreCase("Contractor")) {
-                // For Contractor: additionalParam1 = LocalDate (end date), additionalParam2 = "Project Name"
-                LocalDate contractEndDate = LocalDate.now().plusYears(1);
-                newEmployee = EmployeeFactory.createEmployee(
-                        type, id, firstName, lastName, email, phone,
-                        hireDate, department, salary, // Pass Department object
-                        contractEndDate, "General Project"
-                );
-            }
+            Employee newEmployee = EmployeeFactory.createEmployee(
+                    type, id, firstName, lastName, email, phone,
+                    hireDate, department, salary, // Pass Department object
+                    20, null  // 20 annual leave days
+            );
 
             // Insert employee into database
             if (newEmployee != null && employeeDAO.insertEmployee(newEmployee)) {
