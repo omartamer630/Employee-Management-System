@@ -411,7 +411,6 @@ public class MainController {
      */
     @FXML
     private void handleCloneEmployee() {
-        // Check if employee is selected
         Employee selected = employeeTable.getSelectionModel().getSelectedItem();
 
         if (selected == null) {
@@ -421,24 +420,56 @@ public class MainController {
         }
 
         try {
-            // Step 1: Clone the selected employee
-            Employee clone = selected.clone();
+            // ═══════════════════════════════════════════
+            // ✅ FIXED: Proper type normalization
+            // ═══════════════════════════════════════════
 
-            // Step 2: Give it a new ID
+            // Step 1: Get employee type
+            String type = selected.getEmployeeType(); // "Full-time" or "Part-time" or "Contractor"
+
+            // Step 2: Normalize - remove spaces, hyphens, make lowercase
+            type = type.toLowerCase()           // "full-time"
+                    .replaceAll("[-\\s]", "") // "fulltime" ← remove hyphen and spaces!
+                    .trim();                  // clean whitespace
+
+            System.out.println("Normalized type: " + type); // Debug
+
+            // Step 3: Get prototype from registry
+            Employee clone = EmployeePrototypeRegistry.getPrototype(type);
+
+            if (clone == null) {
+                lblStatus.setText("✗ Prototype not found for type: " + type);
+                lblStatus.setStyle("-fx-text-fill: red;");
+
+                // Debug: show available prototypes
+                System.out.println("Available prototypes: " +
+                        String.join(", ", EmployeePrototypeRegistry.getAvailablePrototypes()));
+                return;
+            }
+
+            // Step 4: Customize the clone
             int newId = (int)(Math.random() * 10000) + 1000;
             clone.setEmployeeId(newId);
+            clone.setFirstName("Copy of " + selected.getFirstName());
+            clone.setLastName(selected.getLastName());
+            clone.setEmail("copy." + selected.getEmail());
+            clone.setPhoneNumber(selected.getPhoneNumber());
+            clone.setHireDate(LocalDate.now());
+            clone.setDepartment(selected.getDepartment());
+            clone.setBaseSalary(selected.getBaseSalary());
 
-            // Step 3: Change the name so we know it's a copy
-            clone.setFirstName("Copy of " + clone.getFirstName());
-            clone.setEmail("copy." + clone.getEmail());
-
-            // Step 4: Save to database
+            // Step 5: Save to database
             if (employeeDAO.insertEmployee(clone)) {
                 loadEmployees();
                 displayEmployeeDetails(clone);
 
-                lblStatus.setText("✓ Employee cloned! New ID: " + newId);
+                lblStatus.setText("✓ Employee cloned from " + type + " prototype! New ID: " + newId);
                 lblStatus.setStyle("-fx-text-fill: green;");
+
+                System.out.println("✓ Successfully cloned:");
+                System.out.println("  Type: " + type);
+                System.out.println("  Original: " + selected.getFirstName() + " (ID: " + selected.getEmployeeId() + ")");
+                System.out.println("  Clone: " + clone.getFirstName() + " (ID: " + clone.getEmployeeId() + ")");
             } else {
                 lblStatus.setText("✗ Failed to save cloned employee.");
                 lblStatus.setStyle("-fx-text-fill: red;");
@@ -447,9 +478,9 @@ public class MainController {
         } catch (Exception e) {
             lblStatus.setText("✗ Error: " + e.getMessage());
             lblStatus.setStyle("-fx-text-fill: red;");
+            e.printStackTrace();
         }
     }
-
     // ==================== ABDELRAHMAN MOHAMED - SINGLETON PATTERN ====================
 
     /**
