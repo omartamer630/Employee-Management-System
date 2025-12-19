@@ -557,14 +557,22 @@ public class MainController {
         }
 
         try {
-            // TODO: ABDELRAHMAN MAGDY - Use OvertimeDecorator
-             Employee empWithOT = new OvertimeDecorator(selected, 10, 25.0);
-             double newSalary = empWithOT.calculateSalary();
-             String benefits = empWithOT.getBenefits();
-             txtPayrollReport.setText("New Salary: $" + newSalary + "\n" + benefits);
+            // Apply overtime using Decorator
+            int overtimeHours = 10; // example, can be from input
+            double overtimeRate = 25.0; // example, can be from input
+            Employee empWithOT = new OvertimeDecorator(selected, overtimeHours, overtimeRate);
 
-            lblStatus.setText("✓ Overtime applied using Decorator Pattern!");
-            lblStatus.setStyle("-fx-text-fill: green;");
+            double newSalary = empWithOT.calculateSalary();
+            String benefits = empWithOT.getBenefits();
+
+            // Update salary in the database
+            EmployeeDAO employeeDAO = new EmployeeDAO();
+            boolean success = employeeDAO.updateSalary(selected.getEmployeeId(), newSalary);
+
+            if (success) {
+                txtPayrollReport.setText("New Salary: $" + newSalary + "\n" + benefits);
+                lblStatus.setText("✓ Overtime applied and salary updated in database!");
+                lblStatus.setStyle("-fx-text-fill: green;");
 
         } catch (Exception e) {
             lblStatus.setText("✗ Error: " + e.getMessage());
@@ -667,6 +675,13 @@ public class MainController {
                 lblStatus.setStyle("-fx-text-fill: green;");
             } else {
                 lblStatus.setText("✗ Update failed.");
+                lblStatus.setStyle("-fx-text-fill: red;");
+            }
+
+                loadEmployees();
+                employeeTable.refresh();
+            } else {
+                lblStatus.setText("✗ Failed to update salary in database.");
                 lblStatus.setStyle("-fx-text-fill: red;");
             }
 
