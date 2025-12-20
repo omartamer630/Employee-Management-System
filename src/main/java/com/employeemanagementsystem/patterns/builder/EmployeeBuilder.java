@@ -26,7 +26,7 @@ public class EmployeeBuilder {
             "Building A, Floor 1"
     );
 
-    private double baseSalary = 0.0;
+    private double baseSalary = 200;
     private String employeeType = "fulltime";
 
     // Type-specific parameters
@@ -98,8 +98,8 @@ public class EmployeeBuilder {
     public EmployeeBuilder projectName(String projectName) {
         this.projectName = projectName;
         return this;
-    }
 
+    }
     /**
      * Build method - creates and returns the final Employee object
      */

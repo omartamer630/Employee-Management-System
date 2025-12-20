@@ -309,10 +309,9 @@ public class MainController {
     @FXML
     private void handleAddEmployeeWithBuilder() {
         try {
-            // Generate random employee ID
             int id = (int) (Math.random() * 10000) + 1;
 
-            // Required fields
+            // Required fields - ONLY these need validation
             String firstName = txtFirstName.getText();
             String lastName = txtLastName.getText();
 
@@ -322,53 +321,46 @@ public class MainController {
                 return;
             }
 
-            // Optional fields with defaults
-            String email = txtEmail.getText();
-            if (email == null || email.isBlank()) email = "not_provided@example.com";
+            EmployeeBuilder builder = new EmployeeBuilder(id, firstName, lastName);
 
-            String phone = txtPhone.getText();
-            if (phone == null || phone.isBlank()) phone = "0000000000";
-
-            LocalDate hireDate = dateHire.getValue();
-            if (hireDate == null) hireDate = LocalDate.now();
-
-            Department department = cmbDepartment.getValue();
-            if (department == null) {
-                department = new Department(1, "Human Resources", "HR Manager", "Building A, Floor 1");
+            // Only set fields if they're actually provided by the user
+            if (txtEmail.getText() != null && !txtEmail.getText().isBlank()) {
+                builder.email(txtEmail.getText());
             }
 
-            double salary = 0.0;
-            try {
-                salary = Double.parseDouble(txtSalary.getText());
-            } catch (NumberFormatException e) {
-                salary = 0.0; // default salary
+            if (txtPhone.getText() != null && !txtPhone.getText().isBlank()) {
+                builder.phoneNumber(txtPhone.getText());
             }
 
-            String employeeType = cmbEmployeeType.getValue();
-            if (employeeType == null || employeeType.isBlank()) employeeType = "fulltime";
+            if (dateHire.getValue() != null) {
+                builder.hireDate(dateHire.getValue());
+            }
 
-            // Build Employee using EmployeeBuilder
-            Employee newEmployee = new EmployeeBuilder(id, firstName, lastName)
-                    .email(email)
-                    .phoneNumber(phone)
-                    .hireDate(hireDate)
-                    .department(department)
-                    .baseSalary(salary)
-                    .employeeType(employeeType)
-                    // Type-specific defaults
-                    .annualLeaveDays(employeeType.toLowerCase().contains("full") ? 20 : 0)
-                    .hoursPerWeek(employeeType.toLowerCase().contains("part") ? 20 : 0)
-                    .hourlyRate(employeeType.toLowerCase().contains("part") ? 15.0 : 0.0)
-                    .contractEndDate(employeeType.toLowerCase().contains("contract") ? LocalDate.now().plusYears(1) : null)
-                    .projectName(employeeType.toLowerCase().contains("contract") ? "General Project" : null)
-                    .build();
+            if (cmbDepartment.getValue() != null) {
+                builder.department(cmbDepartment.getValue());
+            }
 
-            // Insert employee
-            if (newEmployee != null && employeeDAO.insertEmployee(newEmployee)) {
+            if (txtSalary.getText() != null && !txtSalary.getText().isBlank()) {
+                try {
+                    builder.baseSalary(Double.parseDouble(txtSalary.getText()));
+                } catch (NumberFormatException e) {
+                }
+            }
+
+            if (cmbEmployeeType.getValue() != null && !cmbEmployeeType.getValue().isBlank()) {
+                builder.employeeType(cmbEmployeeType.getValue());
+            }
+
+            Employee newEmployee = builder.build();
+
+            if (employeeDAO.insertEmployee(newEmployee)) {
                 loadEmployees();
                 clearFields();
                 lblStatus.setText("✓ Employee added using Builder Pattern!");
                 lblStatus.setStyle("-fx-text-fill: green;");
+            } else {
+                lblStatus.setText("✗ Failed to add employee.");
+                lblStatus.setStyle("-fx-text-fill: red;");
             }
 
         } catch (Exception e) {
